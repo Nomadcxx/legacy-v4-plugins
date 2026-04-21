@@ -69,8 +69,8 @@ Item {
   onPanelOpenScreenChanged: {
     // Recalculate height when screen becomes available (important for bar widget opening)
     contentPreferredHeight = calculateDynamicHeight();
-    root.searchText = ""
-    searchInput.inputItem.forceActiveFocus()
+    root.searchText = "";
+    if (searchInput) searchInput.inputItem.forceActiveFocus();
   }
 
   onMaxScreenHeightChanged: {
@@ -94,7 +94,7 @@ Item {
   // Screen height limit (90% of screen)
   property var panelOpenScreen: pluginApi?.panelOpenScreen
   property real maxScreenHeight: panelOpenScreen ? panelOpenScreen.height * 0.9 : 800
-  
+
   property string searchText: ""
 
   property real contentPreferredWidth: settingsWidth
@@ -105,12 +105,34 @@ Item {
   readonly property bool panelAnchorVerticalCenter: true
   anchors.fill: parent
 
-  // Key badge colors
-  readonly property color keyColorAlt:     "#FF6B6B"
-  readonly property color keyColorXF86:    "#4ECDC4"
-  readonly property color keyColorPrint:   "#95E1D3"
-  readonly property color keyColorNumeric: "#A8DADC"
-  readonly property color keyColorMouse:   "#F38181"
+  // Key badge colors — read from settings with manifest defaults as fallback
+  readonly property color keyColorAlt:     cfg.keyColorAlt     || defaults.keyColorAlt     || "#FF6B6B"
+  readonly property color keyColorXF86:    cfg.keyColorXF86    || defaults.keyColorXF86    || "#4ECDC4"
+  readonly property color keyColorPrint:   cfg.keyColorPrint   || defaults.keyColorPrint   || "#95E1D3"
+  readonly property color keyColorNumeric: cfg.keyColorNumeric || defaults.keyColorNumeric || "#A8DADC"
+  readonly property color keyColorMouse:   cfg.keyColorMouse   || defaults.keyColorMouse   || "#F38181"
+  // Empty string = use theme color (mPrimary/mSecondary/mTertiary)
+  readonly property string keyColorSuperOverride: cfg.keyColorSuper ?? defaults.keyColorSuper ?? ""
+  readonly property string keyColorCtrlOverride:  cfg.keyColorCtrl  ?? defaults.keyColorCtrl  ?? ""
+  readonly property string keyColorShiftOverride: cfg.keyColorShift ?? defaults.keyColorShift ?? ""
+  readonly property color keyColorDefault: cfg.keyColorDefault || defaults.keyColorDefault || "#6C757D"
+  readonly property color keyLabelColor:   cfg.keyLabelColor   || defaults.keyLabelColor   || "#FFFFFF"
+  readonly property color descriptionTextColor: cfg.descriptionTextColor || defaults.descriptionTextColor || "#E0E0E0"
+
+  // Per-category text color overrides (empty = fall back to keyLabelColor)
+  readonly property string keyTextSuperOverride:   cfg.keyTextSuper   ?? defaults.keyTextSuper   ?? ""
+  readonly property string keyTextCtrlOverride:    cfg.keyTextCtrl    ?? defaults.keyTextCtrl    ?? ""
+  readonly property string keyTextShiftOverride:   cfg.keyTextShift   ?? defaults.keyTextShift   ?? ""
+  readonly property string keyTextAltOverride:     cfg.keyTextAlt     ?? defaults.keyTextAlt     ?? ""
+  readonly property string keyTextXF86Override:    cfg.keyTextXF86    ?? defaults.keyTextXF86    ?? ""
+  readonly property string keyTextPrintOverride:   cfg.keyTextPrint   ?? defaults.keyTextPrint   ?? ""
+  readonly property string keyTextNumericOverride: cfg.keyTextNumeric ?? defaults.keyTextNumeric ?? ""
+  readonly property string keyTextMouseOverride:   cfg.keyTextMouse   ?? defaults.keyTextMouse   ?? ""
+  readonly property string keyTextDefaultOverride: cfg.keyTextDefault ?? defaults.keyTextDefault ?? ""
+
+  // Workspace category split tuning
+  readonly property bool splitWorkspaces: cfg.splitLargeWorkspaceCategory ?? defaults.splitLargeWorkspaceCategory ?? true
+  readonly property int workspaceSplitThreshold: cfg.workspaceSplitThreshold ?? defaults.workspaceSplitThreshold ?? 12
 
   // Data is loaded by Main.qml, we just display it
   property bool isLoading: rawCategories.length === 0
@@ -157,7 +179,7 @@ Item {
   Rectangle {
     id: panelContainer
     anchors.fill: parent
-    color: Color.mSurface
+    color: "transparent"
     radius: Style.radiusL
     clip: true
 
@@ -199,8 +221,8 @@ Item {
           text: root.searchText
 
           onTextChanged: {
-            root.searchText = text
-            root.updateColumnItems()
+            root.searchText = text;
+            root.updateColumnItems();
           }
         }
 
@@ -341,7 +363,7 @@ Item {
               text: modelData
               font.pointSize: modelData.length > 12 ? 7 : 8
               font.weight: Font.Bold
-              color: Color.mOnPrimary
+              color: getKeyTextColor(modelData)
             }
           }
         }
@@ -351,22 +373,34 @@ Item {
         Layout.alignment: Qt.AlignVCenter
         text: itemData.desc
         font.pointSize: 9
-        color: Color.mOnSurface
+        color: root.descriptionTextColor
         elide: Text.ElideRight
       }
     }
   }
 
   function getKeyColor(keyName) {
-    if (keyName === "Super") return Color.mPrimary;
-    if (keyName === "Ctrl") return Color.mSecondary;
-    if (keyName === "Shift") return Color.mTertiary;
+    if (keyName === "Super") return root.keyColorSuperOverride || Color.mPrimary;
+    if (keyName === "Ctrl")  return root.keyColorCtrlOverride  || Color.mSecondary;
+    if (keyName === "Shift") return root.keyColorShiftOverride || Color.mTertiary;
     if (keyName === "Alt") return root.keyColorAlt;
     if (keyName.startsWith("XF86")) return root.keyColorXF86;
     if (keyName === "PRINT" || keyName === "Print") return root.keyColorPrint;
     if (keyName.match(/^[0-9]$/)) return root.keyColorNumeric;
     if (keyName.includes("MOUSE") || keyName.includes("Wheel")) return root.keyColorMouse;
-    return Color.mPrimaryContainer ?? "#6C757D";
+    return root.keyColorDefault;
+  }
+
+  function getKeyTextColor(keyName) {
+    if (keyName === "Super") return root.keyTextSuperOverride || root.keyLabelColor;
+    if (keyName === "Ctrl")  return root.keyTextCtrlOverride  || root.keyLabelColor;
+    if (keyName === "Shift") return root.keyTextShiftOverride || root.keyLabelColor;
+    if (keyName === "Alt") return root.keyTextAltOverride || root.keyLabelColor;
+    if (keyName.startsWith("XF86")) return root.keyTextXF86Override || root.keyLabelColor;
+    if (keyName === "PRINT" || keyName === "Print") return root.keyTextPrintOverride || root.keyLabelColor;
+    if (keyName.match(/^[0-9]$/)) return root.keyTextNumericOverride || root.keyLabelColor;
+    if (keyName.includes("MOUSE") || keyName.includes("Wheel")) return root.keyTextMouseOverride || root.keyLabelColor;
+    return root.keyTextDefaultOverride || root.keyLabelColor;
   }
 
   function buildColumnItems(categoryIndices) {
@@ -379,9 +413,9 @@ Item {
 
       var cat = categories[catIndex];
       result.push({ type: "header", title: cat.title });
-      var term = root.searchText.toLowerCase()
+      var term = root.searchText.toLowerCase();
       for (var j = 0; j < cat.binds.length; j++) {
-        if (!term || cat.binds[j].desc.toLowerCase().indexOf(term) !== -1) {
+        if (!term || (cat.binds[j].desc || "").toLowerCase().indexOf(term) !== -1) {
           result.push({
             type: "bind",
             keys: cat.binds[j].keys,
@@ -398,40 +432,54 @@ Item {
 
   function processCategories(cats) {
     if (!cats || cats.length === 0) return [];
+    if (!root.splitWorkspaces) return cats;
 
-    // For Hyprland: split large workspace categories
-    if (CompositorService.isHyprland) {
-      var result = [];
-      for (var i = 0; i < cats.length; i++) {
-        var cat = cats[i];
+    var result = [];
+    for (var i = 0; i < cats.length; i++) {
+      var cat = cats[i];
+      if (!cat.binds || cat.binds.length <= root.workspaceSplitThreshold) {
+        result.push(cat);
+        continue;
+      }
 
-        if (cat.binds && cat.binds.length > 12 && cat.title.includes("OBSZARY ROBOCZE")) {
-          var switching = [], moving = [], mouse = [];
+      // Detect a category dominated by workspace verbs.
+      // Hyprland verbs: workspace, movetoworkspace, movetoworkspacesilent, movecurrentworkspacetomonitor
+      // Niri verbs:     focus-workspace, move-window-to-workspace, move-column-to-workspace
+      var workspaceCount = 0;
+      for (var k = 0; k < cat.binds.length; k++) {
+        var v = cat.binds[k]._verb || "";
+        if (v.indexOf("workspace") !== -1) workspaceCount++;
+      }
+      var workspaceDominated = workspaceCount >= Math.ceil(cat.binds.length * 0.6);
+      if (!workspaceDominated) {
+        result.push(cat);
+        continue;
+      }
 
-          for (var j = 0; j < cat.binds.length; j++) {
-            var bind = cat.binds[j];
-            if (bind.keys.includes("MOUSE")) {
-              mouse.push(bind);
-            } else if (bind.desc.includes("Send") || bind.desc.includes("send") ||
-                       bind.desc.includes("Move") || bind.desc.includes("move") ||
-                       bind.desc.includes("Wyślij") || bind.desc.includes("wyślij")) {
-              moving.push(bind);
-            } else {
-              switching.push(bind);
-            }
-          }
+      var switching = [], moving = [], mouse = [];
+      for (var j = 0; j < cat.binds.length; j++) {
+        var bind = cat.binds[j];
+        var verb = bind._verb || "";
+        var isMouse = (bind._mainKey || "").indexOf("MOUSE") !== -1 ||
+                      (bind.keys || "").indexOf("MOUSE") !== -1 ||
+                      (bind.keys || "").indexOf("Wheel") !== -1;
 
-          if (switching.length > 0) result.push({ title: pluginApi?.tr("panel.workspace-switching"), binds: switching });
-          if (moving.length > 0) result.push({ title: pluginApi?.tr("panel.workspace-moving"), binds: moving });
-          if (mouse.length > 0) result.push({ title: pluginApi?.tr("panel.workspace-mouse"), binds: mouse });
+        if (isMouse) {
+          mouse.push(bind);
+        } else if (verb.indexOf("move") !== -1 || verb.indexOf("send") !== -1) {
+          // Hyprland: movetoworkspace*, Niri: move-window-to-workspace, move-column-to-workspace
+          moving.push(bind);
         } else {
-          result.push(cat);
+          // Hyprland: workspace, Niri: focus-workspace
+          switching.push(bind);
         }
       }
-      return result;
-    }
 
-    return cats;
+      if (switching.length > 0) result.push({ title: pluginApi?.tr("panel.workspace-switching"), binds: switching });
+      if (moving.length > 0)    result.push({ title: pluginApi?.tr("panel.workspace-moving"), binds: moving });
+      if (mouse.length > 0)     result.push({ title: pluginApi?.tr("panel.workspace-mouse"), binds: mouse });
+    }
+    return result;
   }
 
   function distributeCategories() {

@@ -142,6 +142,7 @@ Item {
     if (!CompositorService.isHyprland && !CompositorService.isNiri) {
       isCurrentlyParsing = false;
 
+      Logger.w("KeybindCheatsheet", "Unsupported compositor:", compositorName);
       var unsupportedMsg = getUnsupportedCompositorMessage(compositorName);
       saveToDb([{
         "title": pluginApi?.tr("error.unsupported-compositor"),
@@ -156,6 +157,7 @@ Item {
     var homeDir = Quickshell.env("HOME");
     if (!homeDir) {
       isCurrentlyParsing = false;
+      Logger.e("KeybindCheatsheet", "Cannot resolve $HOME environment variable");
       saveToDb([{
         "title": "ERROR",
         "binds": [{ "keys": "ERROR", "desc": "Cannot get $HOME" }]
@@ -206,6 +208,7 @@ Item {
   // ========== NIRI RECURSIVE PARSING ==========
   function parseNextNiriFile() {
     if (parseDepthCounter >= maxParseDepth) {
+      Logger.w("KeybindCheatsheet", "Niri parser hit max recursion depth (" + maxParseDepth + "), aborting");
       isCurrentlyParsing = false;
       clearParsingData();
       return;
@@ -432,12 +435,34 @@ Item {
       var category = currentCategory || getNiriCategory(action, actionCategories);
       var description = hotkeyTitle || formatNiriAction(action);
 
+      // Extract verb (first whitespace-separated token of action)
+      var verbMatch = action.match(/^([A-Za-z0-9_\-]+)/);
+      var verb = verbMatch ? verbMatch[1] : "";
+
+      // Decompose key combo into modifier set + main key for merge/filter logic
+      var rawParts = currentBindKey.split("+");
+      var mods = [];
+      var mainKey = "";
+      for (var p = 0; p < rawParts.length; p++) {
+        var rp = rawParts[p].trim();
+        if (rp === "Mod" || rp === "Super" || rp === "Win" ||
+            rp === "Ctrl" || rp === "Control" ||
+            rp === "Alt" || rp === "Shift") {
+          mods.push(rp === "Mod" || rp === "Win" ? "Super" : (rp === "Control" ? "Ctrl" : rp));
+        } else if (rp.length > 0) {
+          mainKey = rp;
+        }
+      }
+
       if (!collectedBinds[category]) {
         collectedBinds[category] = [];
       }
       collectedBinds[category].push({
         "keys": formattedKeys,
-        "desc": description
+        "desc": description,
+        "_verb": verb,
+        "_mods": mods.join("+"),
+        "_mainKey": mainKey
       });
 
       // Reset state
@@ -471,14 +496,121 @@ Item {
       }
     }
 
+    if (categories.length === 0) {
+      Logger.w("KeybindCheatsheet", "Niri parser produced no binds; check config path and binds {} block");
+    }
+
+    if (pluginApi?.pluginSettings?.mergeSequentialBinds ?? true) {
+      categories = mergeSequentialBindsInCategories(categories);
+    }
+
     saveToDb(categories);
     isCurrentlyParsing = false;
     clearParsingData();
   }
 
+  // ========== MERGE SEQUENTIAL KEYBINDS ==========
+  // Detects runs of consecutive numeric binds with identical modifiers, identical
+  // verb, and descriptions that differ only by the integer.
+  // Example: Super+1..5 → "Workspace 1", "Workspace 2", ... → "Workspace 1-5"
+  function mergeSequentialBindsInCategories(cats) {
+    if (!cats || cats.length === 0) return cats;
+    var out = [];
+    for (var c = 0; c < cats.length; c++) {
+      var cat = cats[c];
+      out.push({ "title": cat.title, "binds": mergeBindsList(cat.binds || []) });
+    }
+    return out;
+  }
+
+  function mergeBindsList(binds) {
+    if (!binds || binds.length < 2) return binds;
+
+    // Build a list of merge tokens for each bind:
+    //   token = mods + "|" + verb + "|" + descriptionTemplate
+    // descriptionTemplate replaces standalone integers with "%N%"
+    var tokens = [];
+    var nums = [];
+    for (var i = 0; i < binds.length; i++) {
+      var b = binds[i];
+      var mainKey = b._mainKey || "";
+      var asInt = parseInt(mainKey, 10);
+      var keyIsInteger = !isNaN(asInt) && /^\d+$/.test(mainKey);
+      var descTemplate = (b.desc || "").replace(/\b\d+\b/g, "%N%");
+      tokens.push({
+        mods: b._mods || "",
+        verb: b._verb || "",
+        descTemplate: descTemplate,
+        keyIsInteger: keyIsInteger,
+        num: keyIsInteger ? asInt : NaN,
+        bind: b
+      });
+      nums.push(keyIsInteger ? asInt : NaN);
+    }
+
+    var result = [];
+    var i = 0;
+    while (i < tokens.length) {
+      var startTok = tokens[i];
+      if (!startTok.keyIsInteger) {
+        result.push(startTok.bind);
+        i++;
+        continue;
+      }
+
+      // Try to extend a run as long as next bind has same mods/verb/descTemplate
+      // and num is exactly previous + 1
+      var runEnd = i;
+      while (runEnd + 1 < tokens.length) {
+        var nextTok = tokens[runEnd + 1];
+        if (!nextTok.keyIsInteger) break;
+        if (nextTok.mods !== startTok.mods) break;
+        if (nextTok.verb !== startTok.verb) break;
+        if (nextTok.descTemplate !== startTok.descTemplate) break;
+        if (nextTok.num !== tokens[runEnd].num + 1) break;
+        runEnd++;
+      }
+
+      var runLen = runEnd - i + 1;
+      if (runLen >= 3) {
+        // Collapse the run into a single ranged entry.
+        var firstBind = startTok.bind;
+        var lastBind = tokens[runEnd].bind;
+        var lo = startTok.num;
+        var hi = tokens[runEnd].num;
+        var rangeStr = lo + "-" + hi;
+
+        // Reconstruct keys with the range token. Keep the modifier prefix from
+        // the first bind exactly as displayed (it already contains " + ").
+        var firstKeys = firstBind.keys || "";
+        var lastPlus = firstKeys.lastIndexOf(" + ");
+        var prefix = lastPlus >= 0 ? firstKeys.substring(0, lastPlus + 3) : "";
+        var mergedKeys = prefix + rangeStr;
+
+        // Replace the integer in the description template with the range
+        var mergedDesc = (firstBind.desc || "").replace(/\b\d+\b/, rangeStr);
+
+        result.push({
+          "keys": mergedKeys,
+          "desc": mergedDesc,
+          "_verb": firstBind._verb,
+          "_mods": firstBind._mods,
+          "_mainKey": rangeStr,
+          "_merged": true
+        });
+        i = runEnd + 1;
+      } else {
+        result.push(startTok.bind);
+        i++;
+      }
+    }
+    return result;
+  }
+
   // ========== HYPRLAND RECURSIVE PARSING ==========
   function parseNextHyprlandFile() {
     if (parseDepthCounter >= maxParseDepth) {
+      Logger.w("KeybindCheatsheet", "Hyprland parser hit max recursion depth (" + maxParseDepth + "), aborting");
       isCurrentlyParsing = false;
       clearParsingData();
       return;
@@ -587,9 +719,11 @@ Item {
     var categories = [];
     var currentCategory = null;
     var hasCategories = false; // Track if we found any category headers
+    var skippedNoDesc = 0;
 
     var modVar = pluginApi?.pluginSettings?.modKeyVariable || "$mod";
     var modVarUpper = modVar.toUpperCase();
+    var includeUndescribed = pluginApi?.pluginSettings?.showUndescribedBinds ?? false;
 
     for (var i = 0; i < lines.length; i++) {
       var line = lines[i].trim();
@@ -603,8 +737,14 @@ Item {
         var title = line.replace(/#\s*\d+\.\s*/, "").trim();
         currentCategory = { "title": title, "binds": [] };
       }
-      // Keybind: bind = $mod, T, exec, cmd #"description"
-      else if (line.includes("bind") && line.includes('#"')) {
+      // Any bind directive (bind, bindm, binde, bindr, bindl, etc.)
+      else if (/^bind[a-z]*\s*=/.test(line)) {
+        var hasDesc = line.includes('#"');
+        if (!hasDesc && !includeUndescribed) {
+          skippedNoDesc++;
+          continue;
+        }
+
         // If no categories found yet, create default category
         if (!currentCategory && !hasCategories) {
           var defaultCategoryName = pluginApi?.tr("default-category");
@@ -612,19 +752,32 @@ Item {
         }
 
         if (currentCategory) {
-          var descMatch = line.match(/#"(.*?)"$/);
-          var description = descMatch ? descMatch[1] : "No description";
+          var description;
+          if (hasDesc) {
+            var descMatch = line.match(/#"(.*?)"$/);
+            description = descMatch ? descMatch[1] : "No description";
+          } else {
+            description = "";
+          }
 
-          var parts = line.split(',');
+          // Strip the trailing #"..." comment so it doesn't pollute parts splitting
+          var bindLine = hasDesc ? line.replace(/\s*#".*?"\s*$/, "") : line;
+
+          var eqIdx = bindLine.indexOf("=");
+          if (eqIdx < 0) continue;
+          var rhs = bindLine.substring(eqIdx + 1);
+          var parts = rhs.split(',');
           if (parts.length >= 2) {
-            var modPart = parts[0].split('=')[1].trim().toUpperCase();
+            var modPart = parts[0].trim().toUpperCase();
             var rawKey = parts[1].trim().toUpperCase();
             var key = formatSpecialKey(rawKey);
+
+            var verb = parts.length >= 3 ? parts[2].trim().toLowerCase() : "";
+            var param = parts.length >= 4 ? parts.slice(3).join(",").trim() : "";
 
             // Build modifiers list properly
             var mods = [];
             if (modPart.includes(modVarUpper) || modPart.includes("SUPER")) mods.push("Super");
-
             if (modPart.includes("SHIFT")) mods.push("Shift");
             if (modPart.includes("CTRL") || modPart.includes("CONTROL")) mods.push("Ctrl");
             if (modPart.includes("ALT")) mods.push("Alt");
@@ -637,9 +790,18 @@ Item {
               fullKey = key;
             }
 
+            // Auto-generate description for undescribed binds when included
+            if (!hasDesc && includeUndescribed) {
+              description = verb ? (verb + (param ? " " + param : "")) : "(no description)";
+            }
+
             currentCategory.binds.push({
               "keys": fullKey,
-              "desc": description
+              "desc": description,
+              "_verb": verb,
+              "_param": param,
+              "_mods": mods.join("+"),
+              "_mainKey": rawKey
             });
           }
         }
@@ -648,6 +810,18 @@ Item {
 
     if (currentCategory) {
       categories.push(currentCategory);
+    }
+
+    if (skippedNoDesc > 0) {
+      Logger.w("KeybindCheatsheet", "Skipped " + skippedNoDesc + " Hyprland binds without #\"description\" suffix (enable showUndescribedBinds to include)");
+    }
+
+    if (categories.length === 0 || categories.every(function(c) { return !c.binds || c.binds.length === 0; })) {
+      Logger.w("KeybindCheatsheet", "Hyprland parser produced no binds; check config path and #\"description\" annotations");
+    }
+
+    if (pluginApi?.pluginSettings?.mergeSequentialBinds ?? true) {
+      categories = mergeSequentialBindsInCategories(categories);
     }
 
     saveToDb(categories);

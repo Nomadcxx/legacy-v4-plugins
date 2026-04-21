@@ -1,5 +1,63 @@
 # Changelog
 
+## [3.5.0] - 2026-04-21
+
+### New Features
+
+**Full Per-Category Color Customization**
+- Added background and text color pickers for every key category: `Super`, `Ctrl`, `Shift`, `Alt`, `XF86`, `Print`, numeric, mouse, and default letter keys — plus the description text color
+- 9 new `keyText*` settings (`keyTextSuper`, `keyTextCtrl`, …) let the label text of every category be themed independently of the background
+- `keyColorSuper`, `keyColorCtrl`, `keyColorShift` use an empty-string sentinel to mean "use Material theme accent" (`mPrimary` / `mSecondary` / `mTertiary`), so themed setups remain untouched unless the user deliberately overrides
+
+**Redesigned Color Picker UI**
+- Two-pill layout per category: left pill previews the background, right pill previews the label text on that background
+- Single click anywhere on a pill opens `NColorPickerDialog`
+- Pencil-icon edit affordance removed — the entire pill is the control
+- Per-row reset button clears the override and restores the theme default
+- New "Reset all colors" button zeroes out all 20+ color overrides in one action
+
+**Clipboard Quick-Paste**
+- When a valid `#RRGGBB` or `#RRGGBBAA` hex is detected in the clipboard (via `wl-paste`, polled every 1500 ms), a paste icon appears inside each pill
+- Clicking the icon applies the clipboard hex to that pill immediately, no picker dialog required
+- A new hint row above the color pickers tells the user about this behavior
+
+**Live Preview + Revert on Cancel**
+- Color changes are reflected in the preview row immediately via `_applyPreview(key, value)` instead of only after Save
+- A snapshot is taken on `Component.onCompleted`; closing the Settings panel without clicking Save restores the snapshot in `Component.onDestruction`, so cancelled edits are truly reverted
+
+### Bug Fixes
+
+**Ctrl / Shift now actually customizable**
+- Previously `keyColorCtrl` / `keyColorShift` could not be overridden; the panel always fell back to `Color.mPrimaryContainer` (which does not exist on this shell build). Fixed by consistently honoring the empty-string override sentinel and falling back to `mPrimary` / `mSecondary` / `mTertiary`
+- Removed stray references to `Color.mPrimaryContainer` that produced undefined colors at runtime
+
+**Panel opacity now matches other plugins**
+- Switched the Panel from painting its own opaque background to the standard plugin panel-in-panel pattern used by `tailscale` and `hello-world`, so the keybind panel now inherits the user's shell opacity/blur settings correctly
+
+### Code Quality
+
+**Component extraction**
+- Extracted `ColorPill.qml` (single background/text pill with clipboard paste + picker dialog) and `ColorPairRow.qml` (label + bg pill + text pill + reset) from the Settings surface. Settings.qml is now noticeably smaller and each pill row is a single declarative `ColorPairRow { ... }`
+
+**Edit-copy discipline + i18n**
+- Extended the edit-copy pattern to all 20+ color/text settings — `valueKeyColor*` / `valueKeyText*` properties are the source of truth during edit, `saveSettings()` writes them into `pluginSettings` and calls `pluginApi.saveSettings()`
+- The hardcoded `qs … ipc call …` example now lives in `settings.keybind-ipc-command` so it is translation-system-backed like every other string
+- Removed the last `|| "auto"` fallback strings in `ColorPairRow.qml`; the translation system handles missing keys
+- New i18n keys `panel.search-placeholder`, `settings.color-auto`, `settings.color-paste-hint`, `settings.keybind-ipc-command` localized across all 20 supported languages
+
+**Cleanup**
+- Timer and Process objects (clipboard poll + `wl-paste` Process) are stopped/terminated in `Component.onDestruction`
+- Unified empty-string-or-hex property types for overrides (`string` for overrides, `color` for non-optional defaults), preventing QML's implicit `color` coercion from turning `""` into `#000000`
+
+### Manifest
+
+- Version bumped to `3.5.0`
+- `metadata.defaultSettings` gains 20+ new color defaults covering every per-category override plus `keyLabelColor` and `descriptionTextColor`
+- `windowHeight` default corrected from `0` to `850` so the manual-height branch has a sensible initial value
+- Tags extended with `Hyprland` and `Niri` for plugin-catalog search filtering
+
+---
+
 ## [3.4.0] - 2026-04-07
 
 ### Bug Fixes
