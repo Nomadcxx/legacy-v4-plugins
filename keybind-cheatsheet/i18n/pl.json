@@ -19,7 +19,8 @@
     "workspace-switching": "OBSZARY ROBOCZE - PRZEŁĄCZANIE",
     "workspace-moving": "OBSZARY ROBOCZE - PRZENOSZENIE",
     "workspace-mouse": "OBSZARY ROBOCZE - MYSZ",
-    "search-placeholder": "Szukaj skrótów..."
+    "search-placeholder": "Szukaj skrótów...",
+    "no-description": "(brak opisu)"
   },
   "settings": {
     "title": "Ustawienia Skrotow Klawiszowych",

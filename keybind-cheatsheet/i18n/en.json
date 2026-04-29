@@ -19,7 +19,8 @@
     "workspace-switching": "WORKSPACES - SWITCHING",
     "workspace-moving": "WORKSPACES - MOVING",
     "workspace-mouse": "WORKSPACES - MOUSE",
-    "search-placeholder": "Search keybinds..."
+    "search-placeholder": "Search keybinds...",
+    "no-description": "(no description)"
   },
   "settings": {
     "title": "Keybind Cheatsheet Settings",

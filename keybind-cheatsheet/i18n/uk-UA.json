@@ -19,7 +19,8 @@
     "workspace-switching": "РОБОЧІ ОБЛАСТІ - ПЕРЕМИКАННЯ",
     "workspace-moving": "РОБОЧІ ОБЛАСТІ - ПЕРЕМІЩЕННЯ",
     "workspace-mouse": "РОБОЧІ ОБЛАСТІ - МИША",
-    "search-placeholder": "Пошук скорочень..."
+    "search-placeholder": "Пошук скорочень...",
+    "no-description": "(no description)"
   },
   "settings": {
     "title": "Налаштування гарячих клавіш",

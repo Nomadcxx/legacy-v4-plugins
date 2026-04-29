@@ -19,7 +19,8 @@
     "workspace-switching": "कार्यक्षेत्र - स्विच करना",
     "workspace-moving": "कार्यक्षेत्र - स्थानांतरण",
     "workspace-mouse": "कार्यक्षेत्र - माउस",
-    "search-placeholder": "कीबाइंड खोजें..."
+    "search-placeholder": "कीबाइंड खोजें...",
+    "no-description": "(no description)"
   },
   "settings": {
     "title": "कीबाइंड चीटशीट सेटिंग्स",

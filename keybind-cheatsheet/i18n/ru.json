@@ -19,7 +19,8 @@
     "workspace-switching": "РАБОЧИЕ ОБЛАСТИ - ПЕРЕКЛЮЧЕНИЕ",
     "workspace-moving": "РАБОЧИЕ ОБЛАСТИ - ПЕРЕМЕЩЕНИЕ",
     "workspace-mouse": "РАБОЧИЕ ОБЛАСТИ - МЫШЬ",
-    "search-placeholder": "Поиск сочетаний..."
+    "search-placeholder": "Поиск сочетаний...",
+    "no-description": "(no description)"
   },
   "settings": {
     "title": "Настройки горячих клавиш",

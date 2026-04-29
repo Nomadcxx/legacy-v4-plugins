@@ -19,7 +19,8 @@
     "workspace-switching": "ARBETSYTOR - BYTA",
     "workspace-moving": "ARBETSYTOR - FLYTTA",
     "workspace-mouse": "ARBETSYTOR - MUS",
-    "search-placeholder": "Sök genvägar..."
+    "search-placeholder": "Sök genvägar...",
+    "no-description": "(no description)"
   },
   "settings": {
     "title": "Tangentbordsgenvägar Inställningar",

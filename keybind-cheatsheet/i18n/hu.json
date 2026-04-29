@@ -19,7 +19,8 @@
     "workspace-switching": "MUNKATERÜLETEK - VÁLTÁS",
     "workspace-moving": "MUNKATERÜLETEK - ÁTHELYEZÉS",
     "workspace-mouse": "MUNKATERÜLETEK - EGÉR",
-    "search-placeholder": "Billentyűparancsok keresése..."
+    "search-placeholder": "Billentyűparancsok keresése...",
+    "no-description": "(no description)"
   },
   "settings": {
     "title": "Billentyuparancsok Beallitasai",

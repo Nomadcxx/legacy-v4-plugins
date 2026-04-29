@@ -19,7 +19,8 @@
     "workspace-switching": "ÇALIŞMA ALANLARI - GEÇİŞ",
     "workspace-moving": "ÇALIŞMA ALANLARI - TAŞIMA",
     "workspace-mouse": "ÇALIŞMA ALANLARI - FARE",
-    "search-placeholder": "Kısayol ara..."
+    "search-placeholder": "Kısayol ara...",
+    "no-description": "(no description)"
   },
   "settings": {
     "title": "Klavye Kisayollari Ayarlari",

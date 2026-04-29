@@ -19,7 +19,8 @@
     "workspace-switching": "ESPACIOS DE TRABAJO - CAMBIAR",
     "workspace-moving": "ESPACIOS DE TRABAJO - MOVER",
     "workspace-mouse": "ESPACIOS DE TRABAJO - RATÓN",
-    "search-placeholder": "Buscar atajos..."
+    "search-placeholder": "Buscar atajos...",
+    "no-description": "(no description)"
   },
   "settings": {
     "title": "Configuracion de Atajos de Teclado",

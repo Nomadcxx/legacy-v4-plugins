@@ -19,7 +19,8 @@
     "workspace-switching": "ARBEIDSOMRÅDE - BYTTE",
     "workspace-moving": "ARBEIDSOMRÅDE - FLYTTE",
     "workspace-mouse": "ARBEIDSOMRÅDE - MUS",
-    "search-placeholder": "Søk snarvegar..."
+    "search-placeholder": "Søk snarvegar...",
+    "no-description": "(no description)"
   },
   "settings": {
     "title": "Tastesnarveg-jukselapp Innstillingar",

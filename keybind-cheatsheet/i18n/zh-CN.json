@@ -19,7 +19,8 @@
     "workspace-switching": "工作区 - 切换",
     "workspace-moving": "工作区 - 移动",
     "workspace-mouse": "工作区 - 鼠标",
-    "search-placeholder": "搜索快捷键..."
+    "search-placeholder": "搜索快捷键...",
+    "no-description": "(no description)"
   },
   "settings": {
     "title": "快捷键速查表设置",

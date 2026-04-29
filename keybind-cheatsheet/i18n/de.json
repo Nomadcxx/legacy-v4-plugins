@@ -19,7 +19,8 @@
     "workspace-switching": "ARBEITSBEREICHE - WECHSELN",
     "workspace-moving": "ARBEITSBEREICHE - VERSCHIEBEN",
     "workspace-mouse": "ARBEITSBEREICHE - MAUS",
-    "search-placeholder": "Tastenkombinationen suchen..."
+    "search-placeholder": "Tastenkombinationen suchen...",
+    "no-description": "(no description)"
   },
   "settings": {
     "title": "Tastenkürzel-Ubersicht Einstellungen",

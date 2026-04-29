@@ -19,7 +19,8 @@
     "workspace-switching": "SPAZI DI LAVORO - CAMBIO",
     "workspace-moving": "SPAZI DI LAVORO - SPOSTAMENTO",
     "workspace-mouse": "SPAZI DI LAVORO - MOUSE",
-    "search-placeholder": "Cerca scorciatoie..."
+    "search-placeholder": "Cerca scorciatoie...",
+    "no-description": "(no description)"
   },
   "settings": {
     "title": "Impostazioni Scorciatoie da Tastiera",

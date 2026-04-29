@@ -19,7 +19,8 @@
     "workspace-switching": "WERKRUIMTEN - WISSELEN",
     "workspace-moving": "WERKRUIMTEN - VERPLAATSEN",
     "workspace-mouse": "WERKRUIMTEN - MUIS",
-    "search-placeholder": "Zoek sneltoetsen..."
+    "search-placeholder": "Zoek sneltoetsen...",
+    "no-description": "(no description)"
   },
   "settings": {
     "title": "Sneltoetsen Overzicht Instellingen",

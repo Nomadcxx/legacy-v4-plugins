@@ -19,7 +19,8 @@
     "workspace-switching": "ESPAÇOS DE TRABALHO - ALTERNAR",
     "workspace-moving": "ESPAÇOS DE TRABALHO - MOVER",
     "workspace-mouse": "ESPAÇOS DE TRABALHO - MOUSE",
-    "search-placeholder": "Buscar atalhos..."
+    "search-placeholder": "Buscar atalhos...",
+    "no-description": "(no description)"
   },
   "settings": {
     "title": "Configuracoes de Atalhos de Teclado",

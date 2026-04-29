@@ -817,7 +817,7 @@ Item {
 
             // Auto-generate description for undescribed binds when included
             if (!hasDesc && includeUndescribed) {
-              description = verb ? (verb + (param ? " " + param : "")) : "(no description)";
+              description = verb ? (verb + (param ? " " + param : "")) : pluginApi?.tr("panel.no-description");
             }
 
             currentCategory.binds.push({

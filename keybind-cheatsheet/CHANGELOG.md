@@ -1,5 +1,13 @@
 # Changelog
 
+## [3.6.2] - 2026-04-29
+
+### i18n
+
+- Translate "no description" fallback label for undescribed MangoWC binds — was hardcoded `"(no description)"`, now uses `panel.no-description` translation key across all 20 locale files (addresses review feedback from @spiros132 on PR #725).
+
+---
+
 ## [3.6.1] - 2026-04-26
 
 ### MangoWC Parser Regression Fixes

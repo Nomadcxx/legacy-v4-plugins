@@ -19,7 +19,8 @@
     "workspace-switching": "ESPACES DE TRAVAIL - BASCULER",
     "workspace-moving": "ESPACES DE TRAVAIL - DÉPLACER",
     "workspace-mouse": "ESPACES DE TRAVAIL - SOURIS",
-    "search-placeholder": "Rechercher des raccourcis..."
+    "search-placeholder": "Rechercher des raccourcis...",
+    "no-description": "(no description)"
   },
   "settings": {
     "title": "Parametres des Raccourcis Clavier",
