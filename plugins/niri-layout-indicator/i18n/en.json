@@ -1,0 +1,33 @@
+{
+  "settings": {
+    "title": "Niri Layout Indicator",
+    "description": "Keyboard layout indicator and switcher for niri.",
+    "display": {
+      "title": "Display mode",
+      "description": "Choose what the bar widget shows.",
+      "text": "Text: en, ru",
+      "flag": "Flag: 🇺🇸, 🇷🇺"
+    },
+    "middle": {
+      "title": "Middle click action",
+      "description": "Choose what happens when you middle-click the widget.",
+      "previous": "Previous layout",
+      "toggle_display": "Toggle display mode"
+    },
+    "update": {
+      "title": "Update interval",
+      "description": "How often the widget checks the active keyboard layout."
+    }
+  },
+  "menu": {
+    "display": {
+      "text_to_flag": "Display: text → flag",
+      "flag_to_text": "Display: flag → text"
+    },
+    "middle": {
+      "previous": "Middle click: previous layout",
+      "toggle_display": "Middle click: toggle display"
+    },
+    "plugin_settings": "Plugin settings"
+  }
+}
