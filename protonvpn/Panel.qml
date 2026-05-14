@@ -54,13 +54,13 @@ Item {
                     }
 
                     NLabel {
-                        label: "ProtonVPN"
+                        label: pluginApi?.tr("panel.title")
                         Layout.fillWidth: true
                     }
 
                     NIconButton {
                         icon: "refresh"
-                        tooltipText: "Refresh"
+                        tooltipText: pluginApi?.tr("panel.refresh")
                         baseSize: Style.baseWidgetSize * 0.8
                         enabled: !root.acting
                         onClicked: main?.refresh()
@@ -68,7 +68,7 @@ Item {
 
                     NIconButton {
                         icon: "close"
-                        tooltipText: "Close"
+                        tooltipText: pluginApi?.tr("panel.close")
                         baseSize: Style.baseWidgetSize * 0.8
                         onClicked: pluginApi.closePanel(pluginApi.panelOpenScreen)
                     }
@@ -103,10 +103,10 @@ Item {
 
                         NLabel {
                             label: {
-                                if (root.acting)    return "Working…";
-                                if (root.connected) return "Connected";
-                                if (root.vpnStatus === "disconnected") return "Disconnected";
-                                return "Unknown";
+                                if (root.acting)    return pluginApi?.tr("panel.status-working");
+                                if (root.connected) return pluginApi?.tr("panel.status-connected");
+                                if (root.vpnStatus === "disconnected") return pluginApi?.tr("panel.status-disconnected");
+                                return pluginApi?.tr("panel.status-unknown");
                             }
                             labelColor: {
                                 if (root.acting)    return Color.mTertiary;
@@ -139,7 +139,7 @@ Item {
                         spacing: Style.marginS
 
                         NLabel {
-                            label: "Load"
+                            label: pluginApi?.tr("panel.load")
                             labelColor: Color.mOnSurfaceVariant
                         }
 
@@ -179,7 +179,7 @@ Item {
             // ── Primary action ───────────────────────────────────────────────
             NButton {
                 Layout.fillWidth: true
-                text: root.connected ? "Disconnect" : "Connect Fastest"
+                text: root.connected ? pluginApi?.tr("panel.disconnect") : pluginApi?.tr("panel.connect-fastest")
                 enabled: !root.acting && root.vpnStatus !== "unknown"
                 onClicked: root.connected ? main?.disconnect() : main?.connectFastest()
             }
@@ -203,12 +203,12 @@ Item {
                     }
 
                     NLabel {
-                        label: "Kill Switch"
+                        label: pluginApi?.tr("panel.kill-switch")
                         description: {
                             const ks = main?.killSwitch ?? "unknown";
-                            if (ks === "standard") return "Blocks internet if VPN drops";
-                            if (ks === "off")      return "Disabled";
-                            return "Loading…";
+                            if (ks === "standard") return pluginApi?.tr("panel.kill-switch-desc");
+                            if (ks === "off")      return pluginApi?.tr("panel.kill-switch-disabled");
+                            return pluginApi?.tr("panel.loading");
                         }
                         Layout.fillWidth: true
                     }
@@ -234,7 +234,7 @@ Item {
                     spacing: Style.marginS
 
                     NLabel {
-                        label: "Quick connect"
+                        label: pluginApi?.tr("panel.quick-connect")
                         labelColor: Color.mOnSurfaceVariant
                     }
 
@@ -246,14 +246,14 @@ Item {
 
                         NButton {
                             Layout.fillWidth: true
-                            text: "Secure Core"
+                            text: pluginApi?.tr("panel.secure-core")
                             enabled: !root.acting
                             onClicked: main?.connectSecureCore()
                         }
 
                         NButton {
                             Layout.fillWidth: true
-                            text: "P2P"
+                            text: pluginApi?.tr("panel.p2p")
                             enabled: !root.acting
                             onClicked: main?.connectP2P()
                         }

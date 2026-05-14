@@ -50,7 +50,7 @@ Item {
     NPopupContextMenu {
         id: contextMenu
         model: [{
-            label: pluginApi?.tr("settings.pluginSettings") ?? "Plugin settings",
+            label: pluginApi?.tr("settings.pluginSettings"),
             action: "plugin-settings",
             icon: "settings"
         }]
@@ -79,7 +79,7 @@ Item {
                 if (proto) parts.push(proto.toUpperCase());
                 return parts.join(" · ");
             }
-            return "ProtonVPN: disconnected";
+            return pluginApi?.tr("panel.title") + ": " + pluginApi?.tr("panel.disconnected");
         }
 
         customIconColor: Color.resolveColorKeyOptional(root.activeColor)

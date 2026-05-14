@@ -1,0 +1,20 @@
+{
+  "settings": {
+    "pluginSettings": "Plugin settings"
+  },
+  "panel": {
+    "title": "Claude Code",
+    "updated": "Updated just now",
+    "refresh": "Refresh",
+    "close": "Close",
+    "session": "Session",
+    "weekly": "Weekly",
+    "used": "used",
+    "resets": "Resets",
+    "cost": "Cost",
+    "today": "Today",
+    "this-month": "This month",
+    "tokens": "tokens",
+    "sessions": "sessions"
+  }
+}

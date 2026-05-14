@@ -39,7 +39,7 @@ Item {
     NPopupContextMenu {
         id: contextMenu
         model: [{
-            label: pluginApi?.tr("settings.pluginSettings") ?? "Plugin settings",
+            label: pluginApi?.tr("settings.pluginSettings"),
             action: "plugin-settings",
             icon: "settings"
         }]
