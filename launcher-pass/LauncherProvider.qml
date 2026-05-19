@@ -446,6 +446,7 @@ Item {
     pinentryActive = false
     restoringFromPinentry = false
     var escapedPath = shellEscape(path)
+    showProc.environment = { "PASSWORD_STORE_DIR": passwordStoreDir }
     showProc.exec(["pass", "show", escapedPath])
   }
 
@@ -471,12 +472,14 @@ Item {
   function copyOtp(path) {
     root.selectedField = "otp"
     var escapedPath = shellEscape(path)
+    otpProc.environment = { "PASSWORD_STORE_DIR": passwordStoreDir }
     otpProc.exec(["pass", "otp", escapedPath])
   }
 
   function typeOtp(path) {
     root.selectedField = "type-otp"
     var escapedPath = shellEscape(path)
+    otpProc.environment = { "PASSWORD_STORE_DIR": passwordStoreDir }
     otpProc.exec(["pass", "otp", escapedPath])
   }
 
