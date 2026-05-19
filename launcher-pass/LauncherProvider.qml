@@ -120,7 +120,7 @@ Item {
     id: actionProc
     onExited: function(exitCode, exitStatus) {
       if (selectedField !== "type-password" && selectedField !== "type-field" && selectedField !== "type-otp") {
-        ToastService.showNotice(pluginApi?.tr("notification.copied") || "Copied to clipboard")
+        ToastService.showNotice(pluginApi?.tr("notification.copied"))
       }
     }
   }
@@ -280,7 +280,7 @@ Item {
   function commands() {
     return [{
       name: ">pass",
-      description: pluginApi?.tr("command.description") || "Search gnu pass password entries",
+      description: pluginApi?.tr("command.description"),
       icon: "lock",
       isTablerIcon: true,
       onActivate: function() {
@@ -308,7 +308,7 @@ Item {
     if (!loaded) {
       return [{
         name: "Loading...",
-        description: pluginApi?.tr("result.loading") || "Loading password entries...",
+        description: pluginApi?.tr("result.loading"),
         icon: "refresh",
         isTablerIcon: true,
         onActivate: function() {}
@@ -345,8 +345,8 @@ Item {
         results.push({
           name: e.name,
           description: e.isDir
-            ? (pluginApi?.tr("result.folder") || "Folder")
-            : (pluginApi?.tr("result.password") || "Password"),
+            ? (pluginApi?.tr("result.folder"))
+            : (pluginApi?.tr("result.password")),
           icon: e.isDir ? "folder" : "key",
           isTablerIcon: true,
           singleLine: true,
@@ -379,8 +379,8 @@ Item {
     })
 
     results.push({
-      name: pluginApi?.tr("action.copyPassword") || "Copy Password",
-      description: pluginApi?.tr("action.copyPasswordDesc") || "Copy password to clipboard",
+      name: pluginApi?.tr("action.copyPassword"),
+      description: pluginApi?.tr("action.copyPasswordDesc"),
       icon: "copy",
       isTablerIcon: true,
       singleLine: true,
@@ -388,8 +388,8 @@ Item {
     })
 
     results.push({
-      name: pluginApi?.tr("action.typePassword") || "Type Password",
-      description: pluginApi?.tr("action.typePasswordDesc") || "Type password using wtype",
+      name: pluginApi?.tr("action.typePassword"),
+      description: pluginApi?.tr("action.typePasswordDesc"),
       icon: "typography",
       isTablerIcon: true,
       singleLine: true,
@@ -398,8 +398,8 @@ Item {
 
     if (data.hasOtp) {
       results.push({
-        name: pluginApi?.tr("action.copyOtp") || "Copy OTP",
-        description: pluginApi?.tr("action.otpDesc") || "Copy current OTP code",
+        name: pluginApi?.tr("action.copyOtp"),
+        description: pluginApi?.tr("action.otpDesc"),
         icon: "copy",
         isTablerIcon: true,
         singleLine: true,
@@ -407,8 +407,8 @@ Item {
       })
 
       results.push({
-        name: pluginApi?.tr("action.typeOtp") || "Type OTP",
-        description: pluginApi?.tr("action.otpDesc") || "Type current OTP code",
+        name: pluginApi?.tr("action.typeOtp"),
+        description: pluginApi?.tr("action.otpDesc"),
         icon: "typography",
         isTablerIcon: true,
         singleLine: true,
