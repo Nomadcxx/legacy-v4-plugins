@@ -1273,6 +1273,22 @@
       "lastUpdated": "2026-04-18T22:24:44+02:00"
     },
     {
+      "id": "obsidian-provider",
+      "name": "Obsidian Provider",
+      "version": "1.0.0",
+      "official": false,
+      "author": "0b10headedcalf",
+      "description": "Switch between Obsidian vaults from the launcher.",
+      "repository": "https://github.com/noctalia-dev/noctalia-plugins",
+      "minNoctaliaVersion": "4.5.0",
+      "license": "MIT",
+      "tags": [
+        "Launcher",
+        "Productivity"
+      ],
+      "lastUpdated": "2026-05-01T13:04:05-07:00"
+    },
+    {
       "id": "openhue",
       "name": "Openhue widget",
       "version": "1.0.3",
