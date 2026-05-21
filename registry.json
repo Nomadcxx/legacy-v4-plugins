@@ -704,7 +704,7 @@
     {
       "id": "keybind-cheatsheet",
       "name": "Keybind Cheatsheet",
-      "version": "3.7.1",
+      "version": "3.7.2",
       "official": false,
       "author": "blacku",
       "description": "Universal keyboard shortcuts keymap that automatically detects and displays keybindings for Hyprland, Niri, or MangoWC compositors.",
@@ -720,7 +720,7 @@
         "Niri",
         "MangoWC"
       ],
-      "lastUpdated": "2026-05-20T21:37:45+02:00"
+      "lastUpdated": "2026-05-21T23:05:40+02:00"
     },
     {
       "id": "khal-agenda-widget",
