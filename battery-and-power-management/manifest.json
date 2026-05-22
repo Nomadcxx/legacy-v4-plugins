@@ -11,8 +11,7 @@
     "Bar",
     "System",
     "Indicator",
-    "Utility",
-    "Battery"
+    "Utility"
   ],
   "entryPoints": {
     "barWidget": "BarWidget.qml",
