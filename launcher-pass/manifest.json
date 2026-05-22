@@ -20,7 +20,7 @@
     "commandPrefix": "pass",
     "defaultSettings": {
       "storePath": "",
-      "typeDelay": 0.5,
+      "typeDelay": 500,
       "wtypeDelay": 12,
       "clipTimeout": ""
     }

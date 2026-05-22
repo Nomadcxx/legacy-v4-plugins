@@ -11,7 +11,7 @@ ColumnLayout {
   property var defaults: pluginApi?.manifest?.metadata?.defaultSettings || ({})
 
   property string editStorePath: cfg.storePath ?? defaults.storePath ?? ""
-  property string editTypeDelay: String(cfg.typeDelay ?? defaults.typeDelay ?? 0.5)
+  property string editTypeDelay: String(cfg.typeDelay ?? defaults.typeDelay ?? 500)
   property string editWtypeDelay: String(cfg.wtypeDelay ?? defaults.wtypeDelay ?? 12)
   property string editClipTimeout: cfg.clipTimeout ?? defaults.clipTimeout ?? ""
 
@@ -90,7 +90,7 @@ ColumnLayout {
     pluginApi.pluginSettings.storePath = root.editStorePath;
 
     var typeDelayVal = parseFloat(root.editTypeDelay)
-    pluginApi.pluginSettings.typeDelay = isNaN(typeDelayVal) || typeDelayVal < 0 ? 0.5 : typeDelayVal;
+    pluginApi.pluginSettings.typeDelay = isNaN(typeDelayVal) || typeDelayVal < 0 ? 500 : typeDelayVal;
 
     var wtypeDelayVal = parseInt(root.editWtypeDelay)
     pluginApi.pluginSettings.wtypeDelay = isNaN(wtypeDelayVal) || wtypeDelayVal < 0 ? 12 : wtypeDelayVal;

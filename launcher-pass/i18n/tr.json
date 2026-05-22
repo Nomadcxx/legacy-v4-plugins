@@ -31,7 +31,7 @@
     },
     "typeDelay": {
       "label": "Launcher Kapatma Gecikmesi",
-      "desc": "Yazmaya başlamadan önce gecikme saniye cinsinden (varsayılan: 0.2)"
+      "desc": "Yazmaya başlamadan önce gecikme milisaniye cinsinden (varsayılan: 500)"
     },
     "wtypeDelay": {
       "label": "Wtype Tuş Gecikmesi",

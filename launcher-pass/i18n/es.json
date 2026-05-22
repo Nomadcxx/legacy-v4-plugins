@@ -31,7 +31,7 @@
     },
     "typeDelay": {
       "label": "Retraso al cerrar el lanzador",
-      "desc": "Retraso antes de comenzar a escribir en segundos (por defecto: 0.2)"
+      "desc": "Retraso antes de comenzar a escribir en milisegundos (por defecto: 500)"
     },
     "wtypeDelay": {
       "label": "Retraso de pulsación de wtype",

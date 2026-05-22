@@ -31,7 +31,7 @@
     },
     "typeDelay": {
       "label": "Launcher sluit vertraging",
-      "desc": "Vertraging voordat typen begint in seconden (standaard: 0.2)"
+      "desc": "Vertraging voordat typen begint in milliseconden (standaard: 500)"
     },
     "wtypeDelay": {
       "label": "Wtype toetsvertraging",

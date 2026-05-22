@@ -31,7 +31,7 @@
     },
     "typeDelay": {
       "label": "Délai de fermeture du lanceur",
-      "desc": "Délai avant le début de la saisie en secondes (par défaut: 0.2)"
+      "desc": "Délai avant le début de la saisie en millisecondes (par défaut: 500)"
     },
     "wtypeDelay": {
       "label": "Délai de frappe wtype",

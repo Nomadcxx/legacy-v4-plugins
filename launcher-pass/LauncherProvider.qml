@@ -114,12 +114,12 @@ Item {
         ToastService.showNotice(pluginApi?.tr("notification.copied"))
       } else if (root.selectedAction === "type") {
         var otp = otpProc.stdout.text.trim()
-        var typeDelay = getSetting("typeDelay", 0.5)
+        var typeDelay = getSetting("typeDelay", 500)
         var wtypeDelay = getSetting("wtypeDelay", 12)
         var escValue = shellEscape(otp)
         root.resetDetailMode()
         launcher.close()
-        actionProc.exec(["sh", "-c", "sleep " + typeDelay + " && printf '%s' '" + escValue + "' | wtype -d " + wtypeDelay + " -"])
+        actionProc.exec(["sh", "-c", "sleep " + (typeDelay / 1000) + " && printf '%s' '" + escValue + "' | wtype -d " + wtypeDelay + " -"])
       }
     }
   }
@@ -467,12 +467,12 @@ Item {
   function typeField(path, field) {
     var value = field ? field.value : (root.selectedEntry ? root.selectedEntry.data.password : "")
     root.selectedAction = "type"
-    var typeDelay = getSetting("typeDelay", 0.5)
+    var typeDelay = getSetting("typeDelay", 500)
     var wtypeDelay = getSetting("wtypeDelay", 12)
     var escapedValue = shellEscape(value)
     root.resetDetailMode()
     launcher.close()
-    actionProc.exec(["sh", "-c", "sleep " + typeDelay + " && printf '%s' '" + escapedValue + "' | wtype -d " + wtypeDelay + " -"])
+    actionProc.exec(["sh", "-c", "sleep " + (typeDelay / 1000) + " && printf '%s' '" + escapedValue + "' | wtype -d " + wtypeDelay + " -"])
   }
 
   function doOtp(path, actionType) {

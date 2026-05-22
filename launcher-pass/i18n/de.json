@@ -31,7 +31,7 @@
     },
     "typeDelay": {
       "label": "Launcher-Schließen-Verzögerung",
-      "desc": "Verzögerung vor Eingabestart in Sekunden (Standard: 0.2)"
+      "desc": "Verzögerung vor Eingabestart in Millisekunden (Standard: 500)"
     },
     "wtypeDelay": {
       "label": "Wtype-Tastenverzögerung",

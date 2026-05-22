@@ -31,7 +31,7 @@
     },
     "typeDelay": {
       "label": "Atraso ao fechar o lançador",
-      "desc": "Atraso antes de começar a digitar em segundos (predefinido: 0.2)"
+      "desc": "Atraso antes de começar a digitar em milissegundos (predefinido: 500)"
     },
     "wtypeDelay": {
       "label": "Atraso de digitação wtype",

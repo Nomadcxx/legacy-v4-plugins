@@ -31,7 +31,7 @@
     },
     "typeDelay": {
       "label": "Ritardo chiusura launcher",
-      "desc": "Ritardo prima dell'inizio della digitazione in secondi (predefinito: 0.2)"
+      "desc": "Ritardo prima dell'inizio della digitazione in millisecondi (predefinito: 500)"
     },
     "wtypeDelay": {
       "label": "Ritardo battitura wtype",

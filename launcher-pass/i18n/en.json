@@ -30,7 +30,7 @@
     },
     "typeDelay": {
       "label": "Launcher Close Delay",
-      "desc": "Delay before typing starts in seconds (default: 0.5)"
+      "desc": "Delay before typing starts in milliseconds (default: 500)"
     },
     "wtypeDelay": {
       "label": "Wtype Keystroke Delay",
