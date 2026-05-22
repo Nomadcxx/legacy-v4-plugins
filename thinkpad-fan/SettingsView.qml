@@ -30,7 +30,7 @@ ColumnLayout {
 
     // ===== UI =====
     NText {
-        text: pluginApi?.tr("settings.title") ?? "ThinkPad - Fan & Thermal Control - Settings"
+        text: pluginApi?.tr("settings.title")
         pointSize: Style.fontSizeM
         font.weight: Font.Bold
         color: Color.mOnSurface
@@ -39,8 +39,8 @@ ColumnLayout {
     // Option 1: Dynamic coloring based on fan status
     NToggle {
         Layout.fillWidth: true
-        label: pluginApi?.tr("settings.dynamic-coloring") ?? "Dynamic coloring"
-        description: pluginApi?.tr("settings.dynamic-coloring-desc") ?? "Changes the color of the bar capsule when the fan is stopped or at a custom level"
+        label: pluginApi?.tr("settings.dynamic-coloring")
+        description: pluginApi?.tr("settings.dynamic-coloring-desc")
         checked: root.editColorizeByStatus
         onToggled: checked => {
             root.editColorizeByStatus = checked
@@ -51,8 +51,8 @@ ColumnLayout {
     // Option 2: Left Click Interaction Toggle
     NToggle {
         Layout.fillWidth: true
-        label: pluginApi?.tr("settings.allow-popup") ?? "Fan speed manual override"
-        description: pluginApi?.tr("settings.allow-popup-desc") ?? "Left-click on the widget to open the manual fan override panel"
+        label: pluginApi?.tr("settings.allow-popup")
+        description: pluginApi?.tr("settings.allow-popup-desc")
         checked: root.editAllowPopupOpening
         onToggled: checked => {
             root.editAllowPopupOpening = checked
