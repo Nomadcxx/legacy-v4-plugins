@@ -55,7 +55,18 @@ Item {
       var num = parseInt(envValue, 10)
       if (!isNaN(num) && num > 0) return num
     }
-    return 45
+    return null
+  }
+
+  function getPassEnvironment() {
+    var env = {
+          "PASSWORD_STORE_DIR": passwordStoreDir,
+    }
+    var timeout = getClipTimeout()
+    if (timeout != null) {
+        env["PASSWORD_STORE_CLIP_TIME"] = String(timeout)
+    }
+    return env
   }
 
   Process {
@@ -445,15 +456,11 @@ Item {
     root.selectedAction = "copy"
     if (field === null) {
       var escapedPath = shellEscape(path)
-      var clipTimeout = getClipTimeout()
       root.resetDetailMode()
       launcher.close()
       actionProc.exec({
         command: ["pass", "-c", escapedPath],
-        environment: {
-          "PASSWORD_STORE_DIR": passwordStoreDir,
-          "PASSWORD_STORE_CLIP_TIME": String(clipTimeout)
-        }
+        environment: getPassEnvironment(),
       })
     } else {
       var value = field.value
@@ -479,13 +486,9 @@ Item {
     root.selectedAction = actionType
     var escapedPath = shellEscape(path)
     if (actionType === "copy") {
-      var clipTimeout = getClipTimeout()
       otpProc.exec({
         command: ["pass", "otp", "-c", escapedPath],
-        environment: {
-          "PASSWORD_STORE_DIR": passwordStoreDir,
-          "PASSWORD_STORE_CLIP_TIME": String(clipTimeout)
-        }
+        environment: getPassEnvironment(),
       })
     } else {
       otpProc.environment = { "PASSWORD_STORE_DIR": passwordStoreDir }
