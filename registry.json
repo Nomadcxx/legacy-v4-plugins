@@ -1489,6 +1489,23 @@
       "lastUpdated": "2026-04-21T01:35:58+02:00"
     },
     {
+      "id": "protonvpn",
+      "name": "ProtonVPN Status",
+      "version": "1.0.0",
+      "official": false,
+      "author": "blessonmathewsam",
+      "description": "Shows ProtonVPN connection status in the bar with a panel for connect/disconnect, kill switch toggle, and quick connect options. Requires the ProtonVPN CLI (protonvpn-cli) installed and authenticated.",
+      "repository": "https://github.com/noctalia-dev/noctalia-plugins",
+      "minNoctaliaVersion": "3.6.0",
+      "license": "MIT",
+      "tags": [
+        "Bar",
+        "Network",
+        "Privacy"
+      ],
+      "lastUpdated": "2026-05-26T12:18:43-04:00"
+    },
+    {
       "id": "ramadan-iftar",
       "name": "Ramadan Iftar",
       "version": "1.0.3",
