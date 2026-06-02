@@ -1,4 +1,4 @@
-# Set Urgent Window on Notification
+# Set Niri Urgent Window on Notification
 
 This plugin captures notifications and sets the related window's urgent status on Niri.
 Useful for having urgent borders on multi-monitor setups.
