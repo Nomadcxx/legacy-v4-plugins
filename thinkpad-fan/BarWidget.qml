@@ -97,27 +97,29 @@ Item {
         }
     }
 
+    // Persistent process responsible for applying fan level changes
+    Process {
+        id: fanProcess
+        onExited: (exitCode, exitStatus) => {
+            refreshTimer.start();
+        }
+    }
+
     // Executing ACPI fan commands
     function setFanSpeed(targetLevel) {
-        if (!root.isInitialized) return;
+        if (!root.isInitialized) {
+            return;
+        }
 
         let cleanLevel = String(targetLevel).replace(/[\r\n\t]/g, "").trim().toLowerCase();
-        if (!cleanLevel || cleanLevel === "unknown") return;
-        
-        root.fanLevel = cleanLevel;
-        try {
-            let rawQml = 'import Quickshell.Io; Process { command: ["sh", "-c", "echo level ' + cleanLevel + ' > /proc/acpi/ibm/fan"]; running: true }';
-            let proc = Qt.createQmlObject(rawQml, root, "DynamicFanInlineProc");
-            
-            if (proc) {
-                proc.exited.connect(function() {
-                    refreshTimer.start();
-                    proc.destroy();
-                });
-            }
-        } catch (e) {
-            // Fallback tracking
+        if (!cleanLevel || cleanLevel === "unknown") {
+            return;
         }
+
+        root.fanLevel = cleanLevel;
+        fanProcess.running = false;
+        fanProcess.command = ["sh", "-c", "echo level " + cleanLevel + " > /proc/acpi/ibm/fan"];
+        fanProcess.running = true;
     }
 
     Timer { id: refreshTimer; interval: 300; repeat: false; onTriggered: { fanLoader.reload(); tempLoader.reload(); } }
