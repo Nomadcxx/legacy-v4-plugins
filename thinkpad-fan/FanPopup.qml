@@ -29,9 +29,9 @@ Item {
             id: controlCapsule
             Layout.preferredWidth: root.contentPreferredWidth - (Style.marginM * 2)
             Layout.preferredHeight: 140 * Style.uiScaleRatio
-            color: (typeof Color !== "undefined") ? Color.mSurfaceVariant : "#313244"
-            radius: (typeof Style !== "undefined") ? Style.radiusM : 6
-            border.color: (typeof Style !== "undefined") ? Style.capsuleBorderColor : "#33ffffff"
+            color: Color.mSurfaceVariant
+            radius: Style.radiusM
+            border.color: Style.capsuleBorderColor
             border.width: Style.capsuleBorderWidth
 
             ColumnLayout {
@@ -42,8 +42,8 @@ Item {
                 NText {
                     text: pluginApi?.tr("popup.title")
                     font.weight: Font.Bold
-                    pointSize: (typeof Style !== "undefined") ? Style.fontSizeS : 10
-                    color: (typeof Color !== "undefined") ? Color.mOnSurface : "#ffffff"
+                    pointSize: Style.fontSizeS
+                    color: Color.mOnSurface
                     Layout.alignment: Qt.AlignHCenter
                 }
 
@@ -93,8 +93,8 @@ Item {
             anchors.fill: parent
             radius: Style.radiusS
             color: parent.isSelected
-                ? (parent.level === "0" ? "#cc241d" : ((typeof Color !== "undefined") ? Color.mPrimary : "#3355ff"))
-                : ((typeof Color !== "undefined") ? Color.mSurface : "#1e1e2e")
+                ? (parent.level === "0" ? "#cc241d" : Color.mPrimary)
+                : Color.mSurface
             opacity: parent.isSelected ? 1.0 : (parent.containsMouse ? 0.85 : 0.5)
         }
 
@@ -102,10 +102,8 @@ Item {
             anchors.centerIn: parent
             text: parent.text
             font.weight: parent.isSelected ? Font.Bold : Font.Normal
-            pointSize: (typeof Style !== "undefined") ? Style.fontSizeS : 10
-            color: parent.isSelected
-                ? ((typeof Color !== "undefined") ? Color.mOnPrimary : "#ffffff")
-                : ((typeof Color !== "undefined") ? Color.mOnSurface : "#ffffff")
+            pointSize: Style.fontSizeS
+            color: parent.isSelected ? Color.mOnPrimary : Color.mOnSurface
         }
     }
 }

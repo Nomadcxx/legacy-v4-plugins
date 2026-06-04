@@ -19,9 +19,9 @@ Item {
     property int sectionWidgetsCount: 0
 
     readonly property string screenName: screen ? (screen.name ?? "") : ""
-    readonly property real capsuleHeight: (typeof Style !== "undefined" && typeof Style.getCapsuleHeightForScreen === "function") ? Style.getCapsuleHeightForScreen(root.screenName) : 26
-    readonly property real barFontSize: (typeof Style !== "undefined" && typeof Style.getBarFontSizeForScreen === "function") ? Style.getBarFontSizeForScreen(root.screenName) : 10
-    readonly property string fixedFont: (typeof Settings !== "undefined" && Settings.data?.ui?.fontFixed) ? Settings.data.ui.fontFixed : "monospace"
+    readonly property real capsuleHeight: Style.getCapsuleHeightForScreen(root.screenName)
+    readonly property real barFontSize: Style.getBarFontSizeForScreen(root.screenName)
+    readonly property string fixedFont: Settings.data.ui.fontFixed
 
     property int fanRpm: 0
     property string fanLevel: "auto"
@@ -39,10 +39,10 @@ Item {
         pluginApi?.manifest?.metadata?.defaultSettings?.allowPopupOpening ??
         true
 
-    readonly property real contentWidth: layout.implicitWidth + ((typeof Style !== "undefined") ? Style.marginS * 2 : 8)
+    readonly property real contentWidth: layout.implicitWidth + Style.marginS * 2
     readonly property real contentHeight: capsuleHeight
     implicitWidth: contentWidth
-    implicitHeight: (typeof Style !== "undefined") ? Style.barHeight : 32
+    implicitHeight: Style.barHeight
 
     Component.onCompleted: {
         if (pluginApi) {
@@ -155,32 +155,30 @@ Item {
         anchors.centerIn: parent
         width: root.contentWidth
         height: root.contentHeight
-        radius: (typeof Style !== "undefined") ? Style.radiusL : 6
+        radius: Style.radiusL
         
         color: !root.colorizeByStatus
-            ? ((typeof Style !== "undefined") ? Style.capsuleColor : "#1affffff")
+            ? Style.capsuleColor
             : (root.isCustomActive
-                ? ((typeof Color !== "undefined") ? Color.mPrimary : "#3355ff")
-                : (root.fanLevel === "0" ? "#cc241d" : ((typeof Style !== "undefined") ? Style.capsuleColor : "#1affffff")))
+                ? Color.mPrimary
+                : (root.fanLevel === "0" ? "#cc241d" : Style.capsuleColor))
 
         border.color: !root.colorizeByStatus
-            ? ((typeof Style !== "undefined") ? Style.capsuleBorderColor : "#33ffffff")
+            ? Style.capsuleBorderColor
             : (root.isCustomActive
-                ? ((typeof Color !== "undefined") ? Color.mPrimary : "#3355ff")
-                : (root.fanLevel === "0" ? "#cc241d" : ((typeof Style !== "undefined") ? Style.capsuleBorderColor : "#33ffffff")))
-        border.width: (typeof Style !== "undefined") ? Style.capsuleBorderWidth : 1
+                ? Color.mPrimary
+                : (root.fanLevel === "0" ? "#cc241d" : Style.capsuleBorderColor))
+        border.width: Style.capsuleBorderWidth
 
         RowLayout {
             id: layout
             anchors.centerIn: parent
-            spacing: (typeof Style !== "undefined") ? Style.marginXS : 4 // Fixed: Avoided hardcoded spacing value
+            spacing: Style.marginXS
 
             NIcon {
                 id: fanIcon
                 icon: "car-fan"
-                color: (typeof Color !== "undefined")
-                    ? (root.colorizeByStatus && (root.isCustomActive || root.fanLevel === "0") ? Color.mOnPrimary : Color.mOnSurface)
-                    : "#ffffff"
+                color: root.colorizeByStatus && (root.isCustomActive || root.fanLevel === "0") ? Color.mOnPrimary : Color.mOnSurface
             }
 
             NText {
@@ -189,9 +187,7 @@ Item {
                 pointSize: barFontSize
                 font.family: root.fixedFont
                 font.weight: Font.Bold
-                color: (typeof Color !== "undefined")
-                    ? (root.colorizeByStatus && (root.isCustomActive || root.fanLevel === "0") ? Color.mOnPrimary : Color.mOnSurface)
-                    : "#ffffff"
+                color: root.colorizeByStatus && (root.isCustomActive || root.fanLevel === "0") ? Color.mOnPrimary : Color.mOnSurface
             }
         }
     }

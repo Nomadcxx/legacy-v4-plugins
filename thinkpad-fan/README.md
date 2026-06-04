@@ -24,7 +24,7 @@ A resilient system utility plugin designed for the **Noctalia** desktop shell en
 
 Grant group write parameters over systemic thermal interfaces by applying the setup script:
 
-    cd ~/.config/noctalia/plugins/fan-speed/
+    cd ~/.config/noctalia/plugins/thinkpad-fan/
     chmod +x setup_permissions.sh
     ./setup_permissions.sh
 
