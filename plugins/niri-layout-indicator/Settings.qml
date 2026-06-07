@@ -1,215 +1,104 @@
 import QtQuick
 import QtQuick.Layouts
-import Quickshell
 import qs.Commons
 import qs.Widgets
-import qs.Services.UI
 
-Item {
-  id: rootItem
-
-  implicitWidth: 600
-  implicitHeight: root.implicitHeight
-  width: Math.max(implicitWidth, parent ? parent.width : 0)
+ColumnLayout {
+  id: root
+  spacing: Style.marginM
 
   property var pluginApi: null
-  ColumnLayout {
-    id: root
 
-    implicitWidth: 600
-    width: parent.width
-    spacing: Style.marginM
+  property string displayModeValue: pluginApi?.pluginSettings?.displayMode ?? "text"
+  property string middleClickActionValue: pluginApi?.pluginSettings?.middleClickAction ?? "previous"
+  property int pollIntervalMsValue: pluginApi?.pluginSettings?.pollIntervalMs ?? 750
 
-    property var cfg: rootItem.pluginApi?.pluginSettings || ({})
-    property var defaults: rootItem.pluginApi?.manifest?.metadata?.defaultSettings || ({})
+  function tr(key) {
+    return pluginApi?.tr(key) || key
+  }
 
-    property string editDisplayMode: cfg.displayMode || defaults.displayMode || "text"
-    property string editMiddleClickAction: cfg.middleClickAction || defaults.middleClickAction || "previous"
-    property int editPollIntervalMs: cfg.pollIntervalMs ?? defaults.pollIntervalMs ?? 750
+  function saveSettings() {
+    if (!pluginApi || !pluginApi.pluginSettings)
+      return
 
-    function tr(key) {
-      return rootItem.pluginApi?.tr(key)
-    }
+    pluginApi.pluginSettings.displayMode = root.displayModeValue
+    pluginApi.pluginSettings.middleClickAction = root.middleClickActionValue
+    pluginApi.pluginSettings.pollIntervalMs = root.pollIntervalMsValue
 
-    function saveSettings() {
-      if (!rootItem.pluginApi)
-        return
+    pluginApi.saveSettings()
+  }
 
-      rootItem.pluginApi.pluginSettings.displayMode = root.editDisplayMode
-      rootItem.pluginApi.pluginSettings.middleClickAction = root.editMiddleClickAction
-      rootItem.pluginApi.pluginSettings.pollIntervalMs = root.editPollIntervalMs
-      rootItem.pluginApi.saveSettings()
-    }
-    NText {
-      Layout.fillWidth: true
-      text: root.tr("settings.title")
-      pointSize: Style.fontSizeXXL
-      font.weight: Style.fontWeightBold
-      color: Color.mOnSurface
-    }
+  NText {
+    Layout.fillWidth: true
+    text: root.tr("settings.title")
+    pointSize: Style.fontSizeXXL
+    font.weight: Style.fontWeightBold
+    color: Color.mOnSurface
+  }
 
-    NText {
-      Layout.fillWidth: true
-      text: root.tr("settings.description")
-      color: Color.mOnSurfaceVariant
-      pointSize: Style.fontSizeM
-      wrapMode: Text.WordWrap
-    }
+  NText {
+    Layout.fillWidth: true
+    text: root.tr("settings.description")
+    color: Color.mOnSurfaceVariant
+    pointSize: Style.fontSizeM
+    wrapMode: Text.WordWrap
+  }
 
-    NBox {
-      Layout.fillWidth: true
-      Layout.preferredHeight: displayContent.implicitHeight + Style.marginM * 2
-      color: Color.mSurfaceVariant
+  NComboBox {
+    label: root.tr("settings.display.title")
+    description: root.tr("settings.display.description")
+    minimumWidth: 260
 
-      ColumnLayout {
-        id: displayContent
-        anchors.fill: parent
-        anchors.margins: Style.marginM
-        spacing: Style.marginS
+    model: [
+      { "key": "text", "name": root.tr("settings.display.text") },
+      { "key": "flag", "name": root.tr("settings.display.flag") }
+    ]
 
-        NText {
-          Layout.fillWidth: true
-          text: root.tr("settings.display.title")
-          pointSize: Style.fontSizeL
-          font.weight: Style.fontWeightBold
-          color: Color.mOnSurface
-        }
+    currentKey: root.displayModeValue
 
-        NText {
-          Layout.fillWidth: true
-          text: root.tr("settings.display.description")
-          color: Color.mOnSurfaceVariant
-          pointSize: Style.fontSizeS
-          wrapMode: Text.WordWrap
-        }
-
-        NComboBox {
-          id: displayCombo
-
-          Layout.preferredWidth: 240 * Style.uiScaleRatio
-          Layout.preferredHeight: Style.baseWidgetSize
-
-          model: ListModel {
-            ListElement { name: "Text: en, ru"; key: "text" }
-            ListElement { name: "Flag: 🇺🇸, 🇷🇺"; key: "flag" }
-          }
-
-          currentKey: root.editDisplayMode
-
-          onSelected: key => {
-            root.editDisplayMode = key
-          }
-        }
-      }
-    }
-
-    NBox {
-      Layout.fillWidth: true
-      Layout.preferredHeight: middleContent.implicitHeight + Style.marginM * 2
-      color: Color.mSurfaceVariant
-
-      ColumnLayout {
-        id: middleContent
-        anchors.fill: parent
-        anchors.margins: Style.marginM
-        spacing: Style.marginS
-
-        NText {
-          Layout.fillWidth: true
-          text: root.tr("settings.middle.title")
-          pointSize: Style.fontSizeL
-          font.weight: Style.fontWeightBold
-          color: Color.mOnSurface
-        }
-
-        NText {
-          Layout.fillWidth: true
-          text: root.tr("settings.middle.description")
-          color: Color.mOnSurfaceVariant
-          pointSize: Style.fontSizeS
-          wrapMode: Text.WordWrap
-        }
-
-        NComboBox {
-          id: middleCombo
-
-          Layout.preferredWidth: 260 * Style.uiScaleRatio
-          Layout.preferredHeight: Style.baseWidgetSize
-
-          model: ListModel {
-            ListElement { name: "Previous layout"; key: "previous" }
-            ListElement { name: "Toggle display mode"; key: "toggle-mode" }
-          }
-
-          currentKey: root.editMiddleClickAction
-
-          onSelected: key => {
-            root.editMiddleClickAction = key
-          }
-        }
-      }
-    }
-
-    NBox {
-      Layout.fillWidth: true
-      Layout.preferredHeight: updateContent.implicitHeight + Style.marginM * 2
-      color: Color.mSurfaceVariant
-
-      ColumnLayout {
-        id: updateContent
-        anchors.fill: parent
-        anchors.margins: Style.marginM
-        spacing: Style.marginS
-
-        NText {
-          Layout.fillWidth: true
-          text: root.tr("settings.update.title")
-          pointSize: Style.fontSizeL
-          font.weight: Style.fontWeightBold
-          color: Color.mOnSurface
-        }
-
-        NText {
-          Layout.fillWidth: true
-          text: root.tr("settings.update.description")
-          color: Color.mOnSurfaceVariant
-          pointSize: Style.fontSizeS
-          wrapMode: Text.WordWrap
-        }
-
-        NComboBox {
-          id: pollCombo
-
-          Layout.preferredWidth: 180 * Style.uiScaleRatio
-          Layout.preferredHeight: Style.baseWidgetSize
-
-          model: ListModel {
-            ListElement { name: "250 ms"; key: "250" }
-            ListElement { name: "500 ms"; key: "500" }
-            ListElement { name: "750 ms"; key: "750" }
-            ListElement { name: "1000 ms"; key: "1000" }
-            ListElement { name: "1500 ms"; key: "1500" }
-          }
-
-          currentKey: root.editPollIntervalMs.toString()
-
-          onSelected: key => {
-            root.editPollIntervalMs = parseInt(key)
-          }
-        }
-      }
-    }
-
-    Item {
-      Layout.fillHeight: true
+    onSelected: key => {
+      root.displayModeValue = key
     }
   }
 
-  Connections {
-    target: rootItem.pluginApi
+  NComboBox {
+    label: root.tr("settings.middle.title")
+    description: root.tr("settings.middle.description")
+    minimumWidth: 280
 
-    function onSaveRequested() {
-      root.saveSettings()
+    model: [
+      { "key": "previous", "name": root.tr("settings.middle.previous") },
+      { "key": "toggle-mode", "name": root.tr("settings.middle.toggle_display") }
+    ]
+
+    currentKey: root.middleClickActionValue
+
+    onSelected: key => {
+      root.middleClickActionValue = key
     }
+  }
+
+  NComboBox {
+    label: root.tr("settings.update.title")
+    description: root.tr("settings.update.description")
+    minimumWidth: 180
+
+    model: [
+      { "key": "250", "name": "250 ms" },
+      { "key": "500", "name": "500 ms" },
+      { "key": "750", "name": "750 ms" },
+      { "key": "1000", "name": "1000 ms" },
+      { "key": "1500", "name": "1500 ms" }
+    ]
+
+    currentKey: root.pollIntervalMsValue.toString()
+
+    onSelected: key => {
+      root.pollIntervalMsValue = parseInt(key)
+    }
+  }
+
+  Item {
+    Layout.fillHeight: true
   }
 }
