@@ -24,7 +24,7 @@ Item {
 
     property int batPercent: 0
     property real wattNum: 0.0
-    property string batStatus: pluginApi.tr("battery.status_unknown")
+    property string batStatus: pluginApi.tr("battery.status-unknown")
     property string timeRemaining: "..."
     
     property string currentProfile: "balanced"
@@ -194,11 +194,11 @@ Item {
 
             root.batPercent = cap;
             
-            if (statusRaw === "Charging") root.batStatus = pluginApi.tr("battery.status_charging");
-            else if (statusRaw === "Full") root.batStatus = pluginApi.tr("battery.status_full");
-            else if (statusRaw === "Discharging") root.batStatus = pluginApi.tr("battery.status_discharging");
-            else if (statusRaw === "Not charging") root.batStatus = pluginApi.tr("battery.status_not_charging");
-            else root.batStatus = pluginApi.tr("battery.status_unknown");
+            if (statusRaw === "Charging") root.batStatus = pluginApi.tr("battery.status-charging");
+            else if (statusRaw === "Full") root.batStatus = pluginApi.tr("battery.status-full");
+            else if (statusRaw === "Discharging") root.batStatus = pluginApi.tr("battery.status-discharging");
+            else if (statusRaw === "Not charging") root.batStatus = pluginApi.tr("battery.status-not-charging");
+            else root.batStatus = pluginApi.tr("battery.status-unknown");
 
             root.wattNum = rate / 1000000.0;
         }
@@ -214,9 +214,9 @@ Item {
         
         color: mouseArea.containsMouse 
             ? Color.mHover 
-            : (root.batStatus === pluginApi.tr("battery.status_charging") ? Color.mPrimary : Style.capsuleColor)
+            : (root.batStatus === pluginApi.tr("battery.status-charging") ? Color.mPrimary : Style.capsuleColor)
 
-        border.color: root.batStatus === pluginApi.tr("battery.status_charging") ? Color.mPrimary : Style.capsuleBorderColor
+        border.color: root.batStatus === pluginApi.tr("battery.status-charging") ? Color.mPrimary : Style.capsuleBorderColor
         border.width: Style.capsuleBorderWidth
 
         RowLayout {
@@ -225,16 +225,16 @@ Item {
             spacing: Style.marginS
 
             NIcon {
-                icon: (root.batStatus === pluginApi.tr("battery.status_charging") || root.batStatus === pluginApi.tr("battery.status_full")) ? "battery-charging" : "battery-4"
-                color: mouseArea.containsMouse || root.batStatus === pluginApi.tr("battery.status_charging") ? Color.mOnPrimary : Color.mOnSurface
+                icon: (root.batStatus === pluginApi.tr("battery.status-charging") || root.batStatus === pluginApi.tr("battery.status-full")) ? "battery-charging" : "battery-4"
+                color: mouseArea.containsMouse || root.batStatus === pluginApi.tr("battery.status-charging") ? Color.mOnPrimary : Color.mOnSurface
             }
 
             NText {
-                text: root.batPercent + "% " + (root.batStatus === pluginApi.tr("battery.status_charging") ? "+" : "-") + root.wattNum.toFixed(1) + "W"
+                text: root.batPercent + "% " + (root.batStatus === pluginApi.tr("battery.status-charging") ? "+" : "-") + root.wattNum.toFixed(1) + "W"
                 pointSize: barFontSize
                 font.family: root.fixedFont
                 font.weight: Font.Bold
-                color: mouseArea.containsMouse || root.batStatus === pluginApi.tr("battery.status_charging") ? Color.mOnPrimary : Color.mOnSurface
+                color: mouseArea.containsMouse || root.batStatus === pluginApi.tr("battery.status-charging") ? Color.mOnPrimary : Color.mOnSurface
             }
         }
     }
@@ -244,10 +244,43 @@ Item {
         anchors.fill: parent
         hoverEnabled: true
         cursorShape: Qt.PointingHandCursor
-        onClicked: {
-            root.updatePowerProfile();
-            thresholdLoader.reload();
-            pluginApi.openPanel(root.screen, root);
+        acceptedButtons: Qt.LeftButton | Qt.RightButton
+
+
+        onClicked: (mouse) => {
+            if (mouse.button === Qt.RightButton) {
+                PanelService.showContextMenu(contextMenu, root, screen)
+            } else {
+                root.updatePowerProfile();
+                thresholdLoader.reload();
+                pluginApi.openPanel(root.screen, root);
+            }
         }
     }
+
+    // ===== CONTEXT MENU ====
+    NPopupContextMenu {
+        id: contextMenu
+
+        model: [
+            {
+                "label": pluginApi.tr("settings.widget-settings"),
+                "action": "settings",
+                "icon": "settings"
+            }
+        ]
+
+        onTriggered: action => {
+            contextMenu.close()
+            PanelService.closeContextMenu(screen)
+
+            if (action === "settings") {
+                if (pluginApi?.manifest) {
+                    BarService.openPluginSettings(screen, pluginApi.manifest)
+                }
+            }
+        }
+    }
+
+    
 }
