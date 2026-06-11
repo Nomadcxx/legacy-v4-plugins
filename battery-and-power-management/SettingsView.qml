@@ -19,14 +19,20 @@ ColumnLayout {
         pluginApi?.manifest?.metadata?.defaultSettings?.showProfile ??
         true
 
+    property bool editShowBalancedIcon:
+        pluginApi?.pluginSettings?.showBalancedIcon  ??
+        pluginApi?.manifest?.metadata?.defaultSettings?.showBalancedIcon ??
+        false
+
     function saveSettings() {
         if (!pluginApi) return
         pluginApi.pluginSettings.colorizeByProfile = root.editColorizeByProfile
         pluginApi.pluginSettings.showProfile = root.editShowProfile
+        pluginApi.pluginSettings.showBalancedIcon = root.editShowBalancedIcon
         pluginApi.saveSettings()
     }
 
-    // Option 1: Dynamic coloring based on selected profile
+    //Dynamic coloring based on selected profile
     NToggle {
         Layout.fillWidth: true
         label: pluginApi?.tr("settings.dynamic-coloring")
@@ -38,7 +44,7 @@ ColumnLayout {
         }
     }
 
-    // Option 2: Show profile in widget
+    //Show profile in widget
     NToggle {
         Layout.fillWidth: true
         label: pluginApi?.tr("settings.show-profile")
@@ -46,6 +52,20 @@ ColumnLayout {
         checked: root.editShowProfile
         onToggled: checked => {
             root.editShowProfile = checked
+            root.saveSettings()
+        }
+    }
+
+    //Show balanced icon
+    NToggle {
+        enabled: root.editShowProfile
+        Layout.fillWidth: true
+        label: pluginApi?.tr("settings.show-balanced")
+        description: pluginApi?.tr("settings.show-balanced-desc")
+        checked: root.editShowBalancedIcon
+        onToggled: checked => {
+            Logger.d("SettingsView", "showBalancedIcon checked: " + checked)
+            root.editShowBalancedIcon = checked
             root.saveSettings()
         }
     }

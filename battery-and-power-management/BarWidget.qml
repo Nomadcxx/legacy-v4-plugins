@@ -79,6 +79,11 @@ Item {
         pluginApi?.manifest?.metadata?.defaultSettings?.showProfile ??
         true
 
+    property bool showBalancedIcon:
+        pluginApi?.pluginSettings?.showBalancedIcon  ??
+        pluginApi?.manifest?.metadata?.defaultSettings?.showBalancedIcon ??
+        false
+
     // ===== Helpers =====
 
     function parseEta(out) {
@@ -278,6 +283,17 @@ Item {
                 pointSize: barFontSize
                 font.family: root.fixedFont
                 font.weight: Font.Bold
+                color: root.profileForegroundColor
+            }
+
+            NIcon {
+                visible: root.showProfile
+                icon: {
+                    if (root.currentProfile === "power-saver") return "leaf";
+                    if (root.currentProfile === "performance") return "gauge";
+                    if (root.showBalancedIcon) return "scale";
+                    return "";
+                }
                 color: root.profileForegroundColor
             }
         }

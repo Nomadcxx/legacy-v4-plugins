@@ -13,6 +13,8 @@
     "dynamic-coloring-desc": "Cambia il colore della capsula nella barra a seconda del profilo prescelto",
     "show-profile": "Visualizzazione del profilo",
     "show-profile-desc": "Visualizza l'icona del profilo impostato nella capsula",
-    "widget-settings": "Impostazioni del widget"
+    "widget-settings": "Impostazioni del widget",
+    "show-balanced": "Mostra profilo bilanciato",
+    "show-balanced-desc": "Visualizza l'icona del profilo anche quando è impostato su bilanciato (valido solo se la visualizzazione dei profili è attiva)"
   }
 }

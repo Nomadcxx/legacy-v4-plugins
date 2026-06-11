@@ -13,6 +13,8 @@
     "dynamic-coloring-desc": "Change the status bar capsule color based on the selected profile",
     "show-profile": "Show profile",
     "show-profile-desc": "Display the active profile icon inside the capsule",
-    "widget-settings": "Widget settings"
+    "widget-settings": "Widget settings",
+    "show-balanced": "Show balanced profile",
+    "show-balanced-desc": "Display the profile icon even when set to balanced (only valid if profile display is enabled)"
   }
 }

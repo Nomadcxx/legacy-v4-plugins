@@ -24,7 +24,8 @@
   "metadata": {
     "defaultSettings": {
       "colorizeByProfile": true,
-      "showProfile": true
+      "showProfile": true,
+      "showBalancedIcon": false
     }
   }
 }
