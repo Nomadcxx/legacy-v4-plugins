@@ -32,13 +32,15 @@
       "hermesHome": "~/.hermes",
       "hermesCommand": "hermes",
       "autoStartBridge": true,
+      "autoStartGateway": true,
       "statusPollIntervalSec": 30,
       "hideWhenIdle": false,
       "launcherPrefix": ">hermes",
       "panelPinned": false,
       "showToolActivity": false,
       "defaultProvider": "",
-      "defaultModel": ""
+      "defaultModel": "",
+      "configured": false
     }
   }
 }

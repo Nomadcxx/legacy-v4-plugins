@@ -15,7 +15,9 @@
     "interrupt": "Interrupt",
     "refresh": "Refresh",
     "clearAttention": "Clear attention",
-    "cronJobs": "Cron jobs"
+    "cronJobs": "Cron jobs",
+    "startGateway": "Start gateway",
+    "gatewayStarting": "Gateway starting..."
   },
   "panel": {
     "title": "Hermes",
@@ -60,6 +62,8 @@
     "hermesCommand": "Hermes command",
     "autoStartBridge": "Auto-start bridge",
     "autoStartBridgeDescription": "Start the local bridge when Noctalia loads",
+    "autoStartGateway": "Auto-start gateway",
+    "autoStartGatewayDescription": "Start the Hermes gateway when it is not running",
     "statusPollIntervalSec": "Status poll interval",
     "hideWhenIdle": "Hide when idle",
     "hideWhenIdleDescription": "Only show the bar pill when Hermes is active or needs attention",
@@ -83,6 +87,11 @@
     "cron": "Cron",
     "mcp": "MCP",
     "gateway": "Gateway",
+    "gatewayStart": "Start gateway",
+    "gatewayRestart": "Restart gateway",
+    "gatewayStarting": "Starting...",
+    "gatewayNotInstalled": "Not installed — run 'hermes gateway install' in a terminal",
+    "gatewayStartFailed": "Failed to start gateway",
     "activity": "Activity",
     "notSet": "Not set",
     "unknown": "Unknown",
