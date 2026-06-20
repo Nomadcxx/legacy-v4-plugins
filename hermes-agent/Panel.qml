@@ -150,7 +150,7 @@ Item {
             anchors.right: parent.right
             anchors.bottom: parent.bottom
             color: root.statusColor()
-            border.width: 1
+            border.width: Style.borderS
             border.color: Color.mSurface
           }
         }
