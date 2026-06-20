@@ -251,13 +251,19 @@ Item {
     id: contextMenu
     screen: root.screen
 
-    model: [
-      { "label": pluginApi?.tr("bar.openPanel"), "action": "open", "icon": "message-circle" },
-      { "label": pluginApi?.tr("bar.newSession"), "action": "new-session", "icon": "plus" },
-      { "label": pluginApi?.tr("bar.interrupt"), "action": "interrupt", "icon": "octagon" },
-      { "label": pluginApi?.tr("bar.refresh"), "action": "refresh", "icon": "refresh" },
-      { "label": pluginApi?.tr("settings.title"), "action": "settings", "icon": "settings" }
-    ]
+    model: {
+      var items = [
+        { "label": pluginApi?.tr("bar.openPanel"), "action": "open", "icon": "message-circle" },
+        { "label": pluginApi?.tr("bar.newSession"), "action": "new-session", "icon": "plus" },
+        { "label": pluginApi?.tr("bar.interrupt"), "action": "interrupt", "icon": "octagon" },
+        { "label": pluginApi?.tr("bar.refresh"), "action": "refresh", "icon": "refresh" }
+      ];
+      if (root.status === "offline" || root.status === "unknown") {
+        items.push({ "label": pluginApi?.tr("bar.startGateway"), "action": "start-gateway", "icon": "power" });
+      }
+      items.push({ "label": pluginApi?.tr("settings.title"), "action": "settings", "icon": "settings" });
+      return items;
+    }
 
     onTriggered: function(action) {
       contextMenu.close();
@@ -271,6 +277,8 @@ Item {
         mainInstance?.interrupt();
       } else if (action === "refresh") {
         mainInstance?.refreshState();
+      } else if (action === "start-gateway") {
+        mainInstance?.startGateway();
       } else if (action === "settings") {
         BarService.openPluginSettings(root.screen, pluginApi.manifest);
       }
@@ -291,5 +299,6 @@ Item {
     onInterrupt: mainInstance?.interrupt()
     onRefresh: mainInstance?.refreshState()
     onSettings: BarService.openPluginSettings(root.screen, pluginApi.manifest)
+    onStartGateway: mainInstance?.startGateway()
   }
 }

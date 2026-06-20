@@ -20,6 +20,7 @@ ColumnLayout {
   property string valueHermesHome: cfg.hermesHome ?? defaults.hermesHome ?? "~/.hermes"
   property string valueHermesCommand: cfg.hermesCommand ?? defaults.hermesCommand ?? "hermes"
   property bool valueAutoStartBridge: cfg.autoStartBridge ?? defaults.autoStartBridge ?? true
+  property bool valueAutoStartGateway: cfg.autoStartGateway ?? defaults.autoStartGateway ?? true
   property int valueStatusPollIntervalSec: cfg.statusPollIntervalSec ?? defaults.statusPollIntervalSec ?? 30
   property bool valueHideWhenIdle: cfg.hideWhenIdle ?? defaults.hideWhenIdle ?? false
   property string valueLauncherPrefix: cfg.launcherPrefix ?? defaults.launcherPrefix ?? ">hermes"
@@ -226,6 +227,13 @@ ColumnLayout {
         checked: root.valueAutoStartBridge
         onToggled: root.valueAutoStartBridge = checked
       }
+
+      NToggle {
+        label: pluginApi?.tr("settings.autoStartGateway")
+        description: pluginApi?.tr("settings.autoStartGatewayDescription")
+        checked: root.valueAutoStartGateway
+        onToggled: root.valueAutoStartGateway = checked
+      }
     }
   }
 
@@ -237,6 +245,7 @@ ColumnLayout {
     pluginApi.pluginSettings.hermesHome = root.valueHermesHome;
     pluginApi.pluginSettings.hermesCommand = root.valueHermesCommand;
     pluginApi.pluginSettings.autoStartBridge = root.valueAutoStartBridge;
+    pluginApi.pluginSettings.autoStartGateway = root.valueAutoStartGateway;
     pluginApi.pluginSettings.statusPollIntervalSec = root.valueStatusPollIntervalSec;
     pluginApi.pluginSettings.hideWhenIdle = root.valueHideWhenIdle;
     pluginApi.pluginSettings.launcherPrefix = root.valueLauncherPrefix;

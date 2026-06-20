@@ -19,6 +19,7 @@ Item {
   readonly property string hermesHome: cfg.hermesHome ?? defaults.hermesHome ?? "~/.hermes"
   readonly property string hermesCommand: cfg.hermesCommand ?? defaults.hermesCommand ?? "hermes"
   readonly property bool autoStartBridge: cfg.autoStartBridge ?? defaults.autoStartBridge ?? true
+  readonly property bool autoStartGateway: cfg.autoStartGateway ?? defaults.autoStartGateway ?? true
   readonly property int statusPollIntervalSec: cfg.statusPollIntervalSec ?? defaults.statusPollIntervalSec ?? 30
   readonly property string expandedStateFile: expandHome(stateFile)
   readonly property string expandedHermesHome: expandHome(hermesHome)
@@ -86,14 +87,24 @@ Item {
     getJson("/health", function(data) {
       if (data && data.bridge && data.bridge.status === "online") {
         refreshState();
-      } else {
-        startBridge();
+        root.autoConfigure();
+      } else if (root.autoStartBridge) {
+        root.startBridge();
+        bridgeRetryTimer.start();
+      }
+    });
+  }
+
+  function startGateway() {
+    postJson("/gateway/start", {}, function(data) {
+      if (data) {
+        root.refreshState();
       }
     });
   }
 
   function autoConfigure() {
-    var isFirstRun = !pluginApi?.pluginSettings || Object.keys(pluginApi.pluginSettings).length === 0;
+    var isFirstRun = !(root.cfg.configured ?? false);
     if (!isFirstRun) return;
     getJson("/detect", function(data) {
       if (!data) return;
@@ -102,12 +113,19 @@ Item {
       if (data.hermesCommand) s.hermesCommand = data.hermesCommand;
       if (data.model && data.model.name) s.defaultModel = data.model.name;
       if (data.model && data.model.provider) s.defaultProvider = data.model.provider;
+      s.configured = true;
       if (pluginApi) {
         pluginApi.pluginSettings = s;
         pluginApi.saveSettings();
       }
       if (data.hermesHome && data.hermesHome !== root.expandedHermesHome) {
         root.startBridge();
+      }
+      if (root.autoStartGateway && data.gateway) {
+        var gwStatus = data.gateway.status || "";
+        if (gwStatus === "offline" || gwStatus === "stopped" || gwStatus === "unknown") {
+          root.startGateway();
+        }
       }
     });
   }
@@ -305,11 +323,32 @@ Item {
     onTriggered: root.refreshState()
   }
 
-  Component.onCompleted: {
-    if (root.autoStartBridge) {
-      root.ensureBridge();
+  Timer {
+    id: bridgeRetryTimer
+    interval: 500
+    repeat: true
+    property int attempts: 0
+    onTriggered: {
+      attempts++;
+      if (attempts > 20) {
+        bridgeRetryTimer.stop();
+        attempts = 0;
+        root.setBridgeError("Bridge failed to start");
+        return;
+      }
+      getJson("/health", function(data) {
+        if (data && data.bridge && data.bridge.status === "online") {
+          bridgeRetryTimer.stop();
+          attempts = 0;
+          refreshState();
+          root.autoConfigure();
+        }
+      });
     }
-    root.autoConfigure();
+  }
+
+  Component.onCompleted: {
+    root.ensureBridge();
     if (root.pinnedPanelRequested && root.pinnedPanelVisible) {
       root.openPinnedPanel(null);
     }
