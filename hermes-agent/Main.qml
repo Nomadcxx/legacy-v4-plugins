@@ -302,7 +302,7 @@ Item {
     running: true
     repeat: true
     triggeredOnStart: true
-    onTriggered: root.refreshState()
+    onTriggered: root.ensureBridge()
   }
 
   Component.onCompleted: {
