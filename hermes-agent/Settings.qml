@@ -112,7 +112,7 @@ ColumnLayout {
     NButton {
       text: root.showAdvanced ? pluginApi?.tr("settings.advancedHide") : pluginApi?.tr("settings.advancedShow")
       icon: root.showAdvanced ? "chevron-up" : "chevron-down"
-      flat: true
+      outlined: true
       onClicked: root.showAdvanced = !root.showAdvanced
     }
 
