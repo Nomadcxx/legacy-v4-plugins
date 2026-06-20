@@ -280,7 +280,7 @@ Item {
       } else if (action === "start-gateway") {
         mainInstance?.startGateway();
       } else if (action === "settings") {
-        BarService.openPluginSettings(root.screen, pluginApi.manifest);
+        BarService.openPluginSettings(root.screen, pluginApi?.manifest);
       }
     }
   }
@@ -298,7 +298,7 @@ Item {
     }
     onInterrupt: mainInstance?.interrupt()
     onRefresh: mainInstance?.refreshState()
-    onSettings: BarService.openPluginSettings(root.screen, pluginApi.manifest)
+    onSettings: BarService.openPluginSettings(root.screen, pluginApi?.manifest)
     onStartGateway: mainInstance?.startGateway()
   }
 }

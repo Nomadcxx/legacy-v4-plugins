@@ -181,7 +181,7 @@ Item {
       return;
     }
     root.pluginApi?.withCurrentScreen(function(currentScreen) {
-      if (currentScreen) root.pluginApi.openPanel(currentScreen, buttonItem || null);
+      if (currentScreen) root.pluginApi?.openPanel(currentScreen, buttonItem || null);
     });
   }
 
