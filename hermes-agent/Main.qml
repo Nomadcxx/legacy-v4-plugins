@@ -26,6 +26,7 @@ Item {
   readonly property string bridgeScript: (pluginApi?.pluginDir || ".") + "/scripts/hermes_bridge.py"
   readonly property string bridgeTokenFile: expandedStateFile.replace(/\/[^/]*$/, "/bridge.token")
   property string bridgeToken: ""
+  property bool bridgeOnlinePending: false
 
   property var state: ({
     "bridge": { "status": "offline", "error": "" },
@@ -83,11 +84,15 @@ Item {
     bridgeProcess.running = true;
   }
 
+  function onBridgeOnline() {
+    root.bridgeOnlinePending = true;
+    tokenFileView.reload();
+  }
+
   function ensureBridge() {
     getJson("/health", function(data) {
       if (data && data.bridge && data.bridge.status === "online") {
-        refreshState();
-        root.autoConfigure();
+        root.onBridgeOnline();
       } else if (root.autoStartBridge) {
         root.startBridge();
         bridgeRetryTimer.start();
@@ -310,6 +315,11 @@ Item {
     onLoaded: {
       var text = tokenFileView.text();
       root.bridgeToken = text ? text.trim() : "";
+      if (root.bridgeOnlinePending) {
+        root.bridgeOnlinePending = false;
+        root.refreshState();
+        root.autoConfigure();
+      }
     }
     onFileChanged: reload()
     onLoadFailed: {}
@@ -340,8 +350,7 @@ Item {
         if (data && data.bridge && data.bridge.status === "online") {
           bridgeRetryTimer.stop();
           attempts = 0;
-          refreshState();
-          root.autoConfigure();
+          root.onBridgeOnline();
         }
       });
     }
