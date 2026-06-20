@@ -92,6 +92,26 @@ Item {
     });
   }
 
+  function autoConfigure() {
+    var isFirstRun = !pluginApi?.pluginSettings || Object.keys(pluginApi.pluginSettings).length === 0;
+    if (!isFirstRun) return;
+    getJson("/detect", function(data) {
+      if (!data) return;
+      var s = pluginApi?.pluginSettings || ({});
+      if (data.hermesHome && data.hermesHomeExists) s.hermesHome = data.hermesHome;
+      if (data.hermesCommand) s.hermesCommand = data.hermesCommand;
+      if (data.model && data.model.name) s.defaultModel = data.model.name;
+      if (data.model && data.model.provider) s.defaultProvider = data.model.provider;
+      if (pluginApi) {
+        pluginApi.pluginSettings = s;
+        pluginApi.saveSettings();
+      }
+      if (data.hermesHome && data.hermesHome !== root.expandedHermesHome) {
+        root.startBridge();
+      }
+    });
+  }
+
   function createSession() {
     postJson("/session/create", {}, function(data) {
       if (data) root.state = data;
@@ -289,6 +309,7 @@ Item {
     if (root.autoStartBridge) {
       root.ensureBridge();
     }
+    root.autoConfigure();
     if (root.pinnedPanelRequested && root.pinnedPanelVisible) {
       root.openPinnedPanel(null);
     }

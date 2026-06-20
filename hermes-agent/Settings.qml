@@ -28,6 +28,7 @@ ColumnLayout {
   property string valueDefaultProvider: (cfg.defaultProvider || detectedModel.provider || defaults.defaultProvider || "")
   property string valueDefaultModel: (cfg.defaultModel || detectedModel.name || defaults.defaultModel || "")
   readonly property string selectedModelKey: modelKey(valueDefaultProvider, valueDefaultModel)
+  property bool showAdvanced: false
 
   spacing: Style.marginL
 
@@ -42,86 +43,6 @@ ColumnLayout {
   ColumnLayout {
     Layout.fillWidth: true
     spacing: Style.marginM
-
-    NTextInput {
-      Layout.fillWidth: true
-      label: pluginApi?.tr("settings.bridgeHost")
-      text: root.valueBridgeHost
-      onTextChanged: root.valueBridgeHost = text
-    }
-
-    RowLayout {
-      Layout.fillWidth: true
-      spacing: Style.marginM
-
-      ColumnLayout {
-        Layout.fillWidth: true
-        spacing: Style.marginXS
-
-        NText {
-          text: pluginApi?.tr("settings.bridgePort")
-          pointSize: Style.fontSizeM
-          font.weight: Style.fontWeightSemiBold
-          color: Color.mOnSurface
-        }
-
-        NSpinBox {
-          from: 1024
-          to: 65535
-          value: root.valueBridgePort
-          stepSize: 1
-          onValueChanged: root.valueBridgePort = value
-        }
-      }
-
-      ColumnLayout {
-        Layout.fillWidth: true
-        spacing: Style.marginXS
-
-        NText {
-          text: pluginApi?.tr("settings.statusPollIntervalSec")
-          pointSize: Style.fontSizeM
-          font.weight: Style.fontWeightSemiBold
-          color: Color.mOnSurface
-        }
-
-        NSpinBox {
-          from: 5
-          to: 300
-          value: root.valueStatusPollIntervalSec
-          stepSize: 5
-          onValueChanged: root.valueStatusPollIntervalSec = value
-        }
-      }
-    }
-
-    NTextInput {
-      Layout.fillWidth: true
-      label: pluginApi?.tr("settings.stateFile")
-      text: root.valueStateFile
-      onTextChanged: root.valueStateFile = text
-    }
-
-    NTextInput {
-      Layout.fillWidth: true
-      label: pluginApi?.tr("settings.hermesHome")
-      text: root.valueHermesHome
-      onTextChanged: root.valueHermesHome = text
-    }
-
-    NTextInput {
-      Layout.fillWidth: true
-      label: pluginApi?.tr("settings.hermesCommand")
-      text: root.valueHermesCommand
-      onTextChanged: root.valueHermesCommand = text
-    }
-
-    NTextInput {
-      Layout.fillWidth: true
-      label: pluginApi?.tr("settings.launcherPrefix")
-      text: root.valueLauncherPrefix
-      onTextChanged: root.valueLauncherPrefix = text
-    }
 
     ColumnLayout {
       Layout.fillWidth: true
@@ -157,25 +78,6 @@ ColumnLayout {
       }
     }
 
-    RowLayout {
-      Layout.fillWidth: true
-      spacing: Style.marginM
-
-      NTextInput {
-        Layout.fillWidth: true
-        label: pluginApi?.tr("settings.defaultProvider")
-        text: root.valueDefaultProvider
-        onTextChanged: root.valueDefaultProvider = text
-      }
-
-      NTextInput {
-        Layout.fillWidth: true
-        label: pluginApi?.tr("settings.defaultModel")
-        text: root.valueDefaultModel
-        onTextChanged: root.valueDefaultModel = text
-      }
-    }
-
     NButton {
       text: pluginApi?.tr("settings.applyModel")
       icon: "refresh"
@@ -184,13 +86,6 @@ ColumnLayout {
         root.saveSettings();
         root.mainInstance?.setModel(root.valueDefaultProvider.trim(), root.valueDefaultModel.trim(), false);
       }
-    }
-
-    NToggle {
-      label: pluginApi?.tr("settings.autoStartBridge")
-      description: pluginApi?.tr("settings.autoStartBridgeDescription")
-      checked: root.valueAutoStartBridge
-      onToggled: root.valueAutoStartBridge = checked
     }
 
     NToggle {
@@ -212,6 +107,125 @@ ColumnLayout {
       description: pluginApi?.tr("settings.showToolActivityDescription")
       checked: root.valueShowToolActivity
       onToggled: root.valueShowToolActivity = checked
+    }
+
+    NButton {
+      text: root.showAdvanced ? pluginApi?.tr("settings.advancedHide") : pluginApi?.tr("settings.advancedShow")
+      icon: root.showAdvanced ? "chevron-up" : "chevron-down"
+      flat: true
+      onClicked: root.showAdvanced = !root.showAdvanced
+    }
+
+    ColumnLayout {
+      Layout.fillWidth: true
+      spacing: Style.marginM
+      visible: root.showAdvanced
+
+      NTextInput {
+        Layout.fillWidth: true
+        label: pluginApi?.tr("settings.bridgeHost")
+        text: root.valueBridgeHost
+        onTextChanged: root.valueBridgeHost = text
+      }
+
+      RowLayout {
+        Layout.fillWidth: true
+        spacing: Style.marginM
+
+        ColumnLayout {
+          Layout.fillWidth: true
+          spacing: Style.marginXS
+
+          NText {
+            text: pluginApi?.tr("settings.bridgePort")
+            pointSize: Style.fontSizeM
+            font.weight: Style.fontWeightSemiBold
+            color: Color.mOnSurface
+          }
+
+          NSpinBox {
+            from: 1024
+            to: 65535
+            value: root.valueBridgePort
+            stepSize: 1
+            onValueChanged: root.valueBridgePort = value
+          }
+        }
+
+        ColumnLayout {
+          Layout.fillWidth: true
+          spacing: Style.marginXS
+
+          NText {
+            text: pluginApi?.tr("settings.statusPollIntervalSec")
+            pointSize: Style.fontSizeM
+            font.weight: Style.fontWeightSemiBold
+            color: Color.mOnSurface
+          }
+
+          NSpinBox {
+            from: 5
+            to: 300
+            value: root.valueStatusPollIntervalSec
+            stepSize: 5
+            onValueChanged: root.valueStatusPollIntervalSec = value
+          }
+        }
+      }
+
+      NTextInput {
+        Layout.fillWidth: true
+        label: pluginApi?.tr("settings.stateFile")
+        text: root.valueStateFile
+        onTextChanged: root.valueStateFile = text
+      }
+
+      NTextInput {
+        Layout.fillWidth: true
+        label: pluginApi?.tr("settings.hermesHome")
+        text: root.valueHermesHome
+        onTextChanged: root.valueHermesHome = text
+      }
+
+      NTextInput {
+        Layout.fillWidth: true
+        label: pluginApi?.tr("settings.hermesCommand")
+        text: root.valueHermesCommand
+        onTextChanged: root.valueHermesCommand = text
+      }
+
+      NTextInput {
+        Layout.fillWidth: true
+        label: pluginApi?.tr("settings.launcherPrefix")
+        text: root.valueLauncherPrefix
+        onTextChanged: root.valueLauncherPrefix = text
+      }
+
+      RowLayout {
+        Layout.fillWidth: true
+        spacing: Style.marginM
+
+        NTextInput {
+          Layout.fillWidth: true
+          label: pluginApi?.tr("settings.defaultProvider")
+          text: root.valueDefaultProvider
+          onTextChanged: root.valueDefaultProvider = text
+        }
+
+        NTextInput {
+          Layout.fillWidth: true
+          label: pluginApi?.tr("settings.defaultModel")
+          text: root.valueDefaultModel
+          onTextChanged: root.valueDefaultModel = text
+        }
+      }
+
+      NToggle {
+        label: pluginApi?.tr("settings.autoStartBridge")
+        description: pluginApi?.tr("settings.autoStartBridgeDescription")
+        checked: root.valueAutoStartBridge
+        onToggled: root.valueAutoStartBridge = checked
+      }
     }
   }
 

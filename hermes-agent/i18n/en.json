@@ -73,7 +73,9 @@
     "panelPinned": "Pin side panel",
     "panelPinnedDescription": "Keep the Hermes panel in persistent side-chat mode",
     "showToolActivity": "Show tool activity",
-    "showToolActivityDescription": "Keep tool calls collapsed into a compact activity line"
+    "showToolActivityDescription": "Keep tool calls collapsed into a compact activity line",
+    "advancedShow": "Advanced settings",
+    "advancedHide": "Hide advanced"
   },
   "summary": {
     "hermes": "Hermes",

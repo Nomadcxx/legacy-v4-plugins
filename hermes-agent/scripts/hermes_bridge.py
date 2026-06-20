@@ -6,6 +6,7 @@ from __future__ import annotations
 import json
 import os
 import secrets
+import shutil
 import subprocess
 import sys
 import time
@@ -18,6 +19,99 @@ from typing import Any
 
 
 FALSE_VALUES = {"false", "0", "no", "off", "disabled", "paused"}
+
+
+def detect_hermes_home() -> str:
+    """Find the Hermes home directory. Checks env, then common paths."""
+    env_home = os.environ.get("HERMES_HOME")
+    if env_home:
+        p = Path(env_home).expanduser()
+        if p.exists() and (p / "config.yaml").exists():
+            return str(p)
+
+    candidates = [
+        Path.home() / ".hermes",
+        Path.home() / ".config" / "hermes",
+        Path.home() / ".local" / "share" / "hermes",
+        Path("/etc/hermes"),
+    ]
+    for c in candidates:
+        if c.exists() and (c / "config.yaml").exists():
+            return str(c)
+
+    for c in candidates:
+        if c.exists():
+            return str(c)
+
+    return str(Path.home() / ".hermes")
+
+
+def detect_hermes_command() -> str:
+    """Find the hermes binary. Checks PATH, then common install locations."""
+    found = shutil.which("hermes")
+    if found:
+        return found
+
+    candidates = [
+        Path.home() / ".local" / "bin" / "hermes",
+        Path.home() / ".hermes" / "bin" / "hermes",
+        Path("/usr/local/bin/hermes"),
+        Path("/usr/bin/hermes"),
+    ]
+    for c in candidates:
+        if c.exists() and os.access(c, os.X_OK):
+            return str(c)
+
+    return "hermes"
+
+
+def detect_gateway(hermes_home: str | Path) -> dict[str, Any]:
+    """Read gateway_state.json and return gateway status + PID."""
+    path = Path(hermes_home).expanduser() / "gateway_state.json"
+    if not path.exists():
+        return {"status": "offline", "pid": "", "platforms": {}}
+    try:
+        data = json.loads(path.read_text())
+    except (OSError, json.JSONDecodeError):
+        return {"status": "unknown", "pid": "", "platforms": {}}
+    pid = str(data.get("pid") or "")
+    state = str(data.get("gateway_state") or data.get("status") or "unknown")
+    platforms = data.get("platforms") or {}
+    if isinstance(platforms, dict):
+        platforms = {
+            str(k): str(v.get("state") or v.get("status") or "unknown")
+            for k, v in platforms.items()
+            if isinstance(v, dict)
+        }
+    else:
+        platforms = {}
+    return {"status": state, "pid": pid, "platforms": platforms}
+
+
+def detect_model(hermes_home: str | Path) -> dict[str, str]:
+    """Read config.yaml and return the default model + provider."""
+    config = scan_config_summary(hermes_home)
+    return config.get("model", {"name": "", "provider": ""})
+
+
+def detect_all(hermes_home: str | Path | None = None, hermes_command: str | None = None) -> dict[str, Any]:
+    """Run all detection checks and return a combined result."""
+    home = hermes_home or detect_hermes_home()
+    cmd = hermes_command or detect_hermes_command()
+    gateway = detect_gateway(home)
+    model = detect_model(home)
+    home_path = Path(home).expanduser()
+    return {
+        "hermesHome": str(home_path),
+        "hermesCommand": cmd,
+        "hermesHomeExists": home_path.exists(),
+        "configExists": (home_path / "config.yaml").exists(),
+        "gateway": gateway,
+        "model": model,
+        "bridgeHost": "127.0.0.1",
+        "bridgePort": 19777,
+        "stateFile": "~/.cache/noctalia-hermes/state.json",
+    }
 
 
 def now_ts() -> float:
@@ -668,6 +762,13 @@ class BridgeRequestHandler(BaseHTTPRequestHandler):
         if self.path == "/health":
             self._send_json(200, health_payload(self.server.state.snapshot()))
             return
+        if self.path == "/detect":
+            detected = detect_all(
+                self.server.state.hermes_home,
+                self.server.hermes_command,
+            )
+            self._send_json(200, detected)
+            return
         if not self._check_token():
             self._send_json(403, {"error": "forbidden"})
             return
@@ -884,6 +985,10 @@ def run_server(
     hermes_home: str | Path,
     hermes_command: str,
 ) -> None:
+    if not hermes_home or hermes_home == "~/.hermes":
+        hermes_home = detect_hermes_home()
+    if not hermes_command or hermes_command == "hermes":
+        hermes_command = detect_hermes_command()
     state = HermesState(state_file, hermes_home)
     rpc = HermesRpcClient(state, hermes_home)
     httpd = create_server(host, port, state, rpc, hermes_command)

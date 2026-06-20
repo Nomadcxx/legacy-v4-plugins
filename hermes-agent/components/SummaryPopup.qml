@@ -184,7 +184,7 @@ PopupWindow {
             anchors.right: parent.right
             anchors.bottom: parent.bottom
             color: root.statusColor(root.hermesStatus)
-            border.width: Style.borderS
+            border.width: 1
             border.color: Color.mSurface
           }
         }
