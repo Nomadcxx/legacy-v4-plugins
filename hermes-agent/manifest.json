@@ -1,0 +1,44 @@
+{
+  "id": "hermes-agent",
+  "name": "Hermes Agent",
+  "version": "1.0.0",
+  "minNoctaliaVersion": "4.4.1",
+  "author": "nomadx",
+  "license": "MIT",
+  "description": "Native Noctalia status and side-panel interface for Hermes Agent.",
+  "repository": "https://github.com/noctalia-dev/noctalia-plugins",
+  "tags": [
+    "Bar",
+    "Panel",
+    "Launcher",
+    "AI"
+  ],
+  "entryPoints": {
+    "main": "Main.qml",
+    "barWidget": "BarWidget.qml",
+    "panel": "Panel.qml",
+    "launcherProvider": "LauncherProvider.qml",
+    "settings": "Settings.qml"
+  },
+  "dependencies": {
+    "plugins": []
+  },
+  "metadata": {
+    "commandPrefix": "hermes",
+    "defaultSettings": {
+      "bridgeHost": "127.0.0.1",
+      "bridgePort": 19777,
+      "stateFile": "~/.cache/noctalia-hermes/state.json",
+      "hermesHome": "~/.hermes",
+      "hermesCommand": "hermes",
+      "autoStartBridge": true,
+      "statusPollIntervalSec": 30,
+      "hideWhenIdle": false,
+      "launcherPrefix": ">hermes",
+      "panelPinned": false,
+      "showToolActivity": false,
+      "defaultProvider": "",
+      "defaultModel": ""
+    }
+  }
+}
