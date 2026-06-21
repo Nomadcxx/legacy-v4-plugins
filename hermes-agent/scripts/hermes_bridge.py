@@ -114,40 +114,6 @@ def detect_all(hermes_home: str | Path | None = None, hermes_command: str | None
     }
 
 
-def start_gateway(hermes_command: str) -> dict[str, Any]:
-    """Start the Hermes gateway. Tries `hermes gateway start` first (systemd/launchd
-    background service), falls back to `hermes gateway run` as a detached background
-    process if no service is installed."""
-    try:
-        result = subprocess.run(
-            [hermes_command, "gateway", "start"],
-            capture_output=True,
-            text=True,
-            timeout=10,
-        )
-        if result.returncode == 0:
-            return {"status": "running", "method": "service", "message": ""}
-    except (subprocess.TimeoutExpired, FileNotFoundError, OSError):
-        pass
-
-    try:
-        subprocess.Popen(
-            [hermes_command, "gateway", "run", "--quiet"],
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,
-            stdin=subprocess.DEVNULL,
-            start_new_session=True,
-        )
-        return {"status": "starting", "method": "foreground", "message": ""}
-    except (FileNotFoundError, OSError) as exc:
-        return {
-            "status": "error",
-            "method": "",
-            "message": str(exc),
-            "suggestion": f"Run '{hermes_command} gateway install' then '{hermes_command} gateway start', or '{hermes_command} gateway run' in a terminal",
-        }
-
-
 def now_ts() -> float:
     return time.time()
 
@@ -809,9 +775,6 @@ class BridgeRequestHandler(BaseHTTPRequestHandler):
         if self.path == "/state":
             self._send_json(200, self.server.state.snapshot())
             return
-        if self.path == "/gateway/status":
-            self._send_json(200, detect_gateway(self.server.state.hermes_home))
-            return
         self._send_json(404, {"error": "not_found"})
 
     def do_POST(self) -> None:
@@ -837,15 +800,13 @@ class BridgeRequestHandler(BaseHTTPRequestHandler):
                 self._handle_model(payload)
             elif self.path == "/oneshot":
                 self._handle_oneshot(payload)
-            elif self.path == "/gateway/start":
-                result = start_gateway(self.server.hermes_command)
-                if result.get("status") == "error":
-                    self._send_json(500, {"error": "gateway_start_failed", "message": result.get("message", ""), "suggestion": result.get("suggestion", "")})
-                else:
-                    self._send_json(200, result)
             elif self.path == "/refresh":
                 self.server.state.write()
                 self._send_json(200, self.server.state.snapshot())
+            elif self.path == "/gateway/start":
+                self._handle_gateway_start()
+            elif self.path == "/gateway/stop":
+                self._handle_gateway_stop()
             else:
                 self._send_json(404, {"error": "not_found"})
         except Exception as exc:
@@ -974,6 +935,32 @@ class BridgeRequestHandler(BaseHTTPRequestHandler):
         self.server.state.write()
         self._send_json(200, {"result": {"status": "completed"}, "state": self.server.state.snapshot()})
 
+    def _handle_gateway_start(self) -> None:
+        result = self.server.command_runner(
+            [self.server.hermes_command, "gateway", "start"],
+            capture_output=True,
+            text=True,
+            timeout=30,
+        )
+        if result.returncode != 0:
+            msg = (result.stderr or result.stdout or "gateway start failed").strip()
+            self._send_json(500, {"error": "gateway_start_failed", "message": msg})
+            return
+        self._send_json(200, {"result": {"status": "started"}})
+
+    def _handle_gateway_stop(self) -> None:
+        result = self.server.command_runner(
+            [self.server.hermes_command, "gateway", "stop"],
+            capture_output=True,
+            text=True,
+            timeout=30,
+        )
+        if result.returncode != 0:
+            msg = (result.stderr or result.stdout or "gateway stop failed").strip()
+            self._send_json(500, {"error": "gateway_stop_failed", "message": msg})
+            return
+        self._send_json(200, {"result": {"status": "stopped"}})
+
     def _read_json(self) -> dict[str, Any] | None:
         length = int(self.headers.get("Content-Length", "0") or "0")
         if length == 0:
@@ -1028,7 +1015,7 @@ def run_server(
     hermes_home: str | Path,
     hermes_command: str,
 ) -> None:
-    if not hermes_home or hermes_home in ("~/.hermes", os.path.expanduser("~/.hermes")):
+    if not hermes_home or hermes_home == "~/.hermes":
         hermes_home = detect_hermes_home()
     if not hermes_command or hermes_command == "hermes":
         hermes_command = detect_hermes_command()

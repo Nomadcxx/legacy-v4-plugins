@@ -25,6 +25,7 @@ Item {
   readonly property string gatewayStatus: (summary.gateway && summary.gateway.status) || "unknown"
   readonly property var cfg: pluginApi?.pluginSettings || ({})
   readonly property var defaults: pluginApi?.manifest?.metadata?.defaultSettings || ({})
+  readonly property bool clientOnlyMode: cfg.clientOnlyMode ?? defaults.clientOnlyMode ?? false
   readonly property string hermesIconPath: pluginApi?.pluginDir ? "file://" + pluginApi.pluginDir + "/assets/hermes-icon.png" : ""
 
   readonly property string screenName: screen ? screen.name : ""
@@ -264,7 +265,7 @@ Item {
         { "label": pluginApi?.tr("bar.interrupt"), "action": "interrupt", "icon": "octagon" },
         { "label": pluginApi?.tr("bar.refresh"), "action": "refresh", "icon": "refresh" }
       ];
-      if (root.status === "offline" || root.status === "unknown") {
+      if (!root.clientOnlyMode && (root.status === "offline" || root.status === "unknown")) {
         items.push({ "label": pluginApi?.tr("bar.startGateway"), "action": "start-gateway", "icon": "power" });
       }
       items.push({ "label": pluginApi?.tr("settings.title"), "action": "settings", "icon": "settings" });

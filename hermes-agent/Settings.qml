@@ -268,6 +268,7 @@ ColumnLayout {
       NToggle {
         label: pluginApi?.tr("settings.autoStartGateway")
         description: pluginApi?.tr("settings.autoStartGatewayDescription")
+        visible: !root.valueClientOnlyMode
         checked: root.valueAutoStartGateway
         onToggled: root.valueAutoStartGateway = checked
       }

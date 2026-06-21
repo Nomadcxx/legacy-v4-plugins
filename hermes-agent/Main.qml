@@ -23,13 +23,15 @@ Item {
   readonly property int statusPollIntervalSec: cfg.statusPollIntervalSec ?? defaults.statusPollIntervalSec ?? 30
   readonly property bool clientOnlyMode: cfg.clientOnlyMode ?? defaults.clientOnlyMode ?? false
 
-  // Switching to client-only at runtime: tear down any locally-spawned bridge so
-  // it stops holding the port (the remote bridge is reached via the SSH tunnel).
+  // Switching to client-only at runtime: stop local gateway, tear down local bridge.
+  // The remote bridge (via SSH tunnel) manages the gateway on the server side.
   onClientOnlyModeChanged: {
-    if (clientOnlyMode && bridgeProcess.running) {
-      bridgeProcess.running = false;
+    if (clientOnlyMode) {
+      if (bridgeProcess.running) {
+        bridgeProcess.running = false;
+      }
+      root.stopGateway();
     }
-    // Re-evaluate bridge connection: connect to remote or restart local.
     root.ensureBridge();
   }
   readonly property string expandedStateFile: expandHome(stateFile)
@@ -127,6 +129,14 @@ Item {
 
   function startGateway() {
     postJson("/gateway/start", {}, function(data) {
+      if (data) {
+        root.refreshState();
+      }
+    });
+  }
+
+  function stopGateway() {
+    postJson("/gateway/stop", {}, function(data) {
       if (data) {
         root.refreshState();
       }
