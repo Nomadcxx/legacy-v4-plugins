@@ -60,7 +60,6 @@ PopupWindow {
   signal interrupt()
   signal refresh()
   signal settings()
-  signal startGateway()
 
   implicitWidth: 400 * Style.uiScaleRatio
   implicitHeight: popupContent.implicitHeight
@@ -307,46 +306,6 @@ PopupWindow {
           horizontalAlignment: Text.AlignRight
           elide: Text.ElideRight
           Layout.fillWidth: true
-        }
-      }
-
-      Rectangle {
-        visible: root.gateway.status === "offline" || root.gateway.status === "stopped" || root.gateway.status === "unknown" || root.gateway.status === ""
-        Layout.fillWidth: true
-        implicitHeight: gatewayStartRow.implicitHeight + Style.margin2S
-        radius: Style.radiusS
-        color: Qt.rgba(0.94, 0.18, 0.18, 0.12)
-
-        RowLayout {
-          id: gatewayStartRow
-          anchors {
-            left: parent.left
-            right: parent.right
-            verticalCenter: parent.verticalCenter
-            leftMargin: Style.marginS
-            rightMargin: Style.marginS
-          }
-          spacing: Style.marginS
-
-          NIcon {
-            icon: "power"
-            pointSize: Style.fontSizeS
-            color: Color.mError
-          }
-
-          NText {
-            text: pluginApi?.tr("summary.gatewayNotInstalled")
-            pointSize: Style.fontSizeXS
-            color: Color.mOnSurfaceVariant
-            Layout.fillWidth: true
-            elide: Text.ElideRight
-          }
-
-          NButton {
-            text: pluginApi?.tr("summary.gatewayStart")
-            icon: "play"
-            onClicked: root.startGateway()
-          }
         }
       }
 
