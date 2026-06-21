@@ -306,6 +306,5 @@ Item {
     onInterrupt: mainInstance?.interrupt()
     onRefresh: mainInstance?.refreshState()
     onSettings: BarService.openPluginSettings(root.screen, pluginApi?.manifest)
-    onStartGateway: mainInstance?.startGateway()
   }
 }
