@@ -21,6 +21,8 @@ Item {
   readonly property var bridge: state.bridge || ({})
   readonly property var hermes: state.hermes || ({})
   readonly property var session: state.session || ({})
+  readonly property var summary: state.summary || ({})
+  readonly property string gatewayStatus: (summary.gateway && summary.gateway.status) || "unknown"
   readonly property var cfg: pluginApi?.pluginSettings || ({})
   readonly property var defaults: pluginApi?.manifest?.metadata?.defaultSettings || ({})
   readonly property string hermesIconPath: pluginApi?.pluginDir ? "file://" + pluginApi.pluginDir + "/assets/hermes-icon.png" : ""
@@ -35,7 +37,11 @@ Item {
   readonly property string bridgeStatus: bridge.status || "offline"
   readonly property string hermesStatus: hermes.status || "unknown"
   readonly property bool bridgeOnline: bridgeStatus === "online"
-  readonly property string status: bridgeOnline ? hermesStatus : "offline"
+  // When the bridge is online but Hermes has not reported a lifecycle status yet
+  // (no session run / status hook), fall back to the gateway: running gateway = idle.
+  readonly property string status: !bridgeOnline ? "offline"
+    : (hermesStatus !== "unknown" ? hermesStatus
+       : (gatewayStatus === "running" ? "idle" : "unknown"))
   readonly property bool shouldHide: hideWhenIdle && status === "idle"
 
   readonly property string statusIcon: {

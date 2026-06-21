@@ -21,6 +21,8 @@ ColumnLayout {
   property string valueHermesCommand: cfg.hermesCommand ?? defaults.hermesCommand ?? "hermes"
   property bool valueAutoStartBridge: cfg.autoStartBridge ?? defaults.autoStartBridge ?? true
   property bool valueAutoStartGateway: cfg.autoStartGateway ?? defaults.autoStartGateway ?? true
+  property bool valueClientOnlyMode: cfg.clientOnlyMode ?? defaults.clientOnlyMode ?? false
+  property string valueBridgeTokenManual: cfg.bridgeTokenManual ?? defaults.bridgeTokenManual ?? ""
   property int valueStatusPollIntervalSec: cfg.statusPollIntervalSec ?? defaults.statusPollIntervalSec ?? 30
   property bool valueHideWhenIdle: cfg.hideWhenIdle ?? defaults.hideWhenIdle ?? false
   property string valueLauncherPrefix: cfg.launcherPrefix ?? defaults.launcherPrefix ?? ">hermes"
@@ -121,6 +123,22 @@ ColumnLayout {
       Layout.fillWidth: true
       spacing: Style.marginM
       visible: root.showAdvanced
+
+      NToggle {
+        label: pluginApi?.tr("settings.clientOnlyMode")
+        description: pluginApi?.tr("settings.clientOnlyModeDescription")
+        checked: root.valueClientOnlyMode
+        onToggled: root.valueClientOnlyMode = checked
+      }
+
+      NTextInput {
+        Layout.fillWidth: true
+        visible: root.valueClientOnlyMode
+        label: pluginApi?.tr("settings.bridgeToken")
+        description: pluginApi?.tr("settings.bridgeTokenDescription")
+        text: root.valueBridgeTokenManual
+        onTextChanged: root.valueBridgeTokenManual = text
+      }
 
       NTextInput {
         Layout.fillWidth: true
@@ -224,6 +242,7 @@ ColumnLayout {
       NToggle {
         label: pluginApi?.tr("settings.autoStartBridge")
         description: pluginApi?.tr("settings.autoStartBridgeDescription")
+        visible: !root.valueClientOnlyMode
         checked: root.valueAutoStartBridge
         onToggled: root.valueAutoStartBridge = checked
       }
@@ -246,6 +265,8 @@ ColumnLayout {
     pluginApi.pluginSettings.hermesCommand = root.valueHermesCommand;
     pluginApi.pluginSettings.autoStartBridge = root.valueAutoStartBridge;
     pluginApi.pluginSettings.autoStartGateway = root.valueAutoStartGateway;
+    pluginApi.pluginSettings.clientOnlyMode = root.valueClientOnlyMode;
+    pluginApi.pluginSettings.bridgeTokenManual = root.valueBridgeTokenManual;
     pluginApi.pluginSettings.statusPollIntervalSec = root.valueStatusPollIntervalSec;
     pluginApi.pluginSettings.hideWhenIdle = root.valueHideWhenIdle;
     pluginApi.pluginSettings.launcherPrefix = root.valueLauncherPrefix;

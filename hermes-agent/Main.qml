@@ -21,11 +21,22 @@ Item {
   readonly property bool autoStartBridge: cfg.autoStartBridge ?? defaults.autoStartBridge ?? true
   readonly property bool autoStartGateway: cfg.autoStartGateway ?? defaults.autoStartGateway ?? true
   readonly property int statusPollIntervalSec: cfg.statusPollIntervalSec ?? defaults.statusPollIntervalSec ?? 30
+  readonly property bool clientOnlyMode: cfg.clientOnlyMode ?? defaults.clientOnlyMode ?? false
+
+  // Switching to client-only at runtime: tear down any locally-spawned bridge so
+  // it stops holding the port (the remote bridge is reached via the SSH tunnel).
+  onClientOnlyModeChanged: {
+    if (clientOnlyMode && bridgeProcess.running) {
+      bridgeProcess.running = false;
+    }
+  }
   readonly property string expandedStateFile: expandHome(stateFile)
   readonly property string expandedHermesHome: expandHome(hermesHome)
   readonly property string bridgeScript: (pluginApi?.pluginDir || ".") + "/scripts/hermes_bridge.py"
   readonly property string bridgeTokenFile: expandedStateFile.replace(/\/[^/]*$/, "/bridge.token")
-  property string bridgeToken: ""
+  // In client-only mode the token is pasted into settings (the server prints it);
+  // otherwise it is read from the local bridge.token file by tokenFileView.
+  property string bridgeToken: clientOnlyMode ? (cfg.bridgeTokenManual ?? "") : ""
   property bool bridgeOnlinePending: false
 
   property var state: ({
@@ -71,6 +82,7 @@ Item {
   }
 
   function startBridge() {
+    if (root.clientOnlyMode) return; // remote bridge: never spawn a local subprocess
     if (bridgeProcess.running) return;
     bridgeProcess.command = [
       "python3",
@@ -85,6 +97,13 @@ Item {
   }
 
   function onBridgeOnline() {
+    if (root.clientOnlyMode) {
+      // Token is already set from settings; go straight to state + detection.
+      root.bridgeOnlinePending = false;
+      root.refreshState();
+      root.autoConfigure();
+      return;
+    }
     root.bridgeOnlinePending = true;
     tokenFileView.reload();
   }
@@ -93,7 +112,7 @@ Item {
     getJson("/health", function(data) {
       if (data && data.bridge && data.bridge.status === "online") {
         root.onBridgeOnline();
-      } else if (root.autoStartBridge) {
+      } else if (root.autoStartBridge && !root.clientOnlyMode) {
         root.startBridge();
         bridgeRetryTimer.start();
       }
@@ -299,8 +318,10 @@ Item {
 
   FileView {
     id: stateFileView
-    path: root.expandedStateFile
-    watchChanges: true
+    // Local file watching only works for a local bridge; in client-only mode
+    // state is fetched over HTTP by statePollTimer instead.
+    path: root.clientOnlyMode ? "" : root.expandedStateFile
+    watchChanges: !root.clientOnlyMode
     printErrors: false
     onFileChanged: reload()
     onLoaded: root.loadStateFromFile()
@@ -309,8 +330,8 @@ Item {
 
   FileView {
     id: tokenFileView
-    path: root.bridgeTokenFile
-    watchChanges: true
+    path: root.clientOnlyMode ? "" : root.bridgeTokenFile
+    watchChanges: !root.clientOnlyMode
     printErrors: false
     onLoaded: {
       var text = tokenFileView.text();
@@ -331,6 +352,16 @@ Item {
     repeat: true
     triggeredOnStart: true
     onTriggered: root.ensureBridge()
+  }
+
+  // Client-only mode has no local state file to watch, so poll /state over HTTP.
+  // Poll fast while a session is running (live streaming / approvals), slow when idle.
+  Timer {
+    id: statePollTimer
+    interval: (root.state.session && root.state.session.running) ? 1500 : root.statusPollIntervalSec * 1000
+    running: root.clientOnlyMode
+    repeat: true
+    onTriggered: root.refreshState()
   }
 
   Timer {
