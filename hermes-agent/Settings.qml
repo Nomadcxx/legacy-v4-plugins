@@ -33,7 +33,7 @@ ColumnLayout {
   readonly property string selectedModelKey: modelKey(valueDefaultProvider, valueDefaultModel)
   property bool showAdvanced: false
   property string testResult: ""
-  property color testResultColor: Color.mText
+  property color testResultColor: Color.mOnSurface
 
   spacing: Style.marginL
 
@@ -154,7 +154,7 @@ ColumnLayout {
 
         NLabel {
           text: root.testResult
-          color: root.testResultColor
+          labelColor: root.testResultColor
         }
       }
 
@@ -299,7 +299,7 @@ ColumnLayout {
 
   function testConnection() {
     root.testResult = pluginApi?.tr("settings.testing");
-    root.testResultColor = Color.mText;
+    root.testResultColor = Color.mOnSurface;
     var host = root.valueBridgeHost;
     var port = root.valueBridgePort;
     var token = root.valueBridgeTokenManual;
