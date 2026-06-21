@@ -32,6 +32,8 @@ ColumnLayout {
   property string valueDefaultModel: (cfg.defaultModel || detectedModel.name || defaults.defaultModel || "")
   readonly property string selectedModelKey: modelKey(valueDefaultProvider, valueDefaultModel)
   property bool showAdvanced: false
+  property string testResult: ""
+  property color testResultColor: Color.mText
 
   spacing: Style.marginL
 
@@ -138,6 +140,22 @@ ColumnLayout {
         description: pluginApi?.tr("settings.bridgeTokenDescription")
         text: root.valueBridgeTokenManual
         onTextChanged: root.valueBridgeTokenManual = text
+      }
+
+      RowLayout {
+        Layout.fillWidth: true
+        visible: root.valueClientOnlyMode
+        spacing: Style.marginM
+
+        NButton {
+          text: pluginApi?.tr("settings.testConnection")
+          onClicked: root.testConnection()
+        }
+
+        NLabel {
+          text: root.testResult
+          color: root.testResultColor
+        }
       }
 
       NTextInput {
@@ -276,6 +294,35 @@ ColumnLayout {
     pluginApi.pluginSettings.defaultModel = root.valueDefaultModel;
     pluginApi.saveSettings();
     root.mainInstance?.setPinnedPanelRequested(root.valuePanelPinned);
+  }
+
+  function testConnection() {
+    root.testResult = pluginApi?.tr("settings.testing");
+    root.testResultColor = Color.mText;
+    var host = root.valueBridgeHost;
+    var port = root.valueBridgePort;
+    var token = root.valueBridgeTokenManual;
+    var url = "http://" + host + ":" + port + "/health";
+    var xhr = new XMLHttpRequest();
+    xhr.onreadystatechange = function() {
+      if (xhr.readyState !== XMLHttpRequest.DONE) return;
+      if (xhr.status === 0) {
+        root.testResult = pluginApi?.tr("settings.testFailedUnreachable");
+        root.testResultColor = Color.mError;
+      } else if (xhr.status === 403) {
+        root.testResult = pluginApi?.tr("settings.testFailedAuth");
+        root.testResultColor = Color.mError;
+      } else if (xhr.status >= 200 && xhr.status < 300) {
+        root.testResult = pluginApi?.tr("settings.testSuccess");
+        root.testResultColor = Color.mPrimary;
+      } else {
+        root.testResult = pluginApi?.tr("settings.testFailed") + " " + xhr.status;
+        root.testResultColor = Color.mError;
+      }
+    };
+    xhr.open("GET", url);
+    if (token) xhr.setRequestHeader("X-Bridge-Token", token);
+    xhr.send();
   }
 
   function modelKey(provider, model) {

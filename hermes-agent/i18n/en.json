@@ -83,7 +83,13 @@
     "showToolActivity": "Show tool activity",
     "showToolActivityDescription": "Keep tool calls collapsed into a compact activity line",
     "advancedShow": "Advanced settings",
-    "advancedHide": "Hide advanced"
+    "advancedHide": "Hide advanced",
+    "testConnection": "Test connection",
+    "testing": "Testing...",
+    "testSuccess": "Connected",
+    "testFailed": "Failed:",
+    "testFailedUnreachable": "Unreachable: wrong host/port or bridge not running",
+    "testFailedAuth": "Wrong token"
   },
   "summary": {
     "hermes": "Hermes",
@@ -94,7 +100,7 @@
     "gatewayStart": "Start gateway",
     "gatewayRestart": "Restart gateway",
     "gatewayStarting": "Starting...",
-    "gatewayNotInstalled": "Not installed — run 'hermes gateway install' in a terminal",
+    "gatewayNotInstalled": "Not installed \u2014 run 'hermes gateway install' in a terminal",
     "gatewayStartFailed": "Failed to start gateway",
     "activity": "Activity",
     "notSet": "Not set",

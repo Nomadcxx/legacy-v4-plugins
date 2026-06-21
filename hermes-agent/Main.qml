@@ -29,6 +29,8 @@ Item {
     if (clientOnlyMode && bridgeProcess.running) {
       bridgeProcess.running = false;
     }
+    // Re-evaluate bridge connection: connect to remote or restart local.
+    root.ensureBridge();
   }
   readonly property string expandedStateFile: expandHome(stateFile)
   readonly property string expandedHermesHome: expandHome(hermesHome)
@@ -112,7 +114,11 @@ Item {
     getJson("/health", function(data) {
       if (data && data.bridge && data.bridge.status === "online") {
         root.onBridgeOnline();
-      } else if (root.autoStartBridge && !root.clientOnlyMode) {
+      } else if (root.clientOnlyMode) {
+        // Remote bridge not reachable. statePollTimer will keep retrying /state
+        // and surface connection errors via setBridgeError.
+        root.setBridgeError("Remote bridge unreachable at " + bridgeHost + ":" + bridgePort);
+      } else if (root.autoStartBridge) {
         root.startBridge();
         bridgeRetryTimer.start();
       }
@@ -252,7 +258,15 @@ Item {
           callback(null);
         }
       } else {
-        setBridgeError("Bridge request failed: " + xhr.status);
+        var msg;
+        if (xhr.status === 0) {
+          msg = "Connection failed: " + bridgeHost + ":" + bridgePort + " unreachable";
+        } else if (xhr.status === 403) {
+          msg = "Authentication failed: wrong bridge token";
+        } else {
+          msg = "Bridge request failed: " + xhr.status;
+        }
+        setBridgeError(msg);
         callback(null);
       }
     };
@@ -275,7 +289,15 @@ Item {
           callback(null);
         }
       } else {
-        setBridgeError("Bridge request failed: " + xhr.status);
+        var msg;
+        if (xhr.status === 0) {
+          msg = "Connection failed: " + bridgeHost + ":" + bridgePort + " unreachable";
+        } else if (xhr.status === 403) {
+          msg = "Authentication failed: wrong bridge token";
+        } else {
+          msg = "Bridge request failed: " + xhr.status;
+        }
+        setBridgeError(msg);
         callback(null);
       }
     };
@@ -354,14 +376,14 @@ Item {
     onTriggered: root.ensureBridge()
   }
 
-  // Client-only mode has no local state file to watch, so poll /state over HTTP.
+  // Client-only mode has no local state file to watch, so poll over HTTP.
   // Poll fast while a session is running (live streaming / approvals), slow when idle.
   Timer {
     id: statePollTimer
     interval: (root.state.session && root.state.session.running) ? 1500 : root.statusPollIntervalSec * 1000
     running: root.clientOnlyMode
     repeat: true
-    onTriggered: root.refreshState()
+    onTriggered: root.ensureBridge()
   }
 
   Timer {
