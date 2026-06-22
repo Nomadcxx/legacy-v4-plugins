@@ -13,8 +13,12 @@ Item {
   readonly property var cfg: pluginApi?.pluginSettings || ({})
   readonly property var defaults: pluginApi?.manifest?.metadata?.defaultSettings || ({})
 
-  readonly property string bridgeHost: cfg.bridgeHost ?? defaults.bridgeHost ?? "127.0.0.1"
-  readonly property int bridgePort: cfg.bridgePort ?? defaults.bridgePort ?? 19777
+  // Mode-dependent: normal mode always uses localhost for the local bridge.
+  // clientOnlyMode uses the configured remote host/port.
+  // Without this, toggling clientOnlyMode OFF leaves bridgeHost pointing at the
+  // remote server, causing the plugin to send the LOCAL token to the REMOTE bridge → 403.
+  readonly property string bridgeHost: clientOnlyMode ? (cfg.bridgeHost ?? defaults.bridgeHost ?? "127.0.0.1") : "127.0.0.1"
+  readonly property int bridgePort: clientOnlyMode ? (cfg.bridgePort ?? defaults.bridgePort ?? 19777) : (defaults.bridgePort ?? 19777)
   readonly property string stateFile: cfg.stateFile ?? defaults.stateFile ?? "~/.cache/noctalia-hermes/state.json"
   readonly property string hermesHome: cfg.hermesHome ?? defaults.hermesHome ?? "~/.hermes"
   readonly property string hermesCommand: cfg.hermesCommand ?? defaults.hermesCommand ?? "hermes"
@@ -25,12 +29,22 @@ Item {
 
   // Switching to client-only at runtime: stop local gateway, tear down local bridge.
   // The remote bridge (via SSH tunnel) manages the gateway on the server side.
+  // Switching back: ensureBridge() starts the local bridge; tokenFileView.onLoaded
+  // auto-starts the gateway when autoStartGateway is true and it is not running.
   onClientOnlyModeChanged: {
+    Logger.i("hermes-agent", "clientOnlyModeChanged:", clientOnlyMode,
+      "bridgeHost:", bridgeHost, "bridgePort:", bridgePort,
+      "tokenManual len:", (cfg.bridgeTokenManual ?? "").length,
+      "bridgeToken len:", root.bridgeToken.length,
+      "bridgeTokenFromFile len:", root.bridgeTokenFromFile.length);
     if (clientOnlyMode) {
       if (bridgeProcess.running) {
         bridgeProcess.running = false;
       }
-      root.stopGateway();
+      // ponytail: removed stopGateway() here — bridgeHost has already updated to
+      // remote, so stopGateway() would hit the REMOTE bridge and stop the REMOTE
+      // gateway. Local gateway is orphaned but harmless; maybeStartGateway() handles
+      // it when switching back to normal mode.
     }
     root.ensureBridge();
   }
@@ -40,7 +54,10 @@ Item {
   readonly property string bridgeTokenFile: expandedStateFile.replace(/\/[^/]*$/, "/bridge.token")
   // In client-only mode the token is pasted into settings (the server prints it);
   // otherwise it is read from the local bridge.token file by tokenFileView.
-  property string bridgeToken: clientOnlyMode ? (cfg.bridgeTokenManual ?? "") : ""
+  // readonly: imperative assignment in tokenFileView.onLoaded would break the binding,
+  // leaving bridgeToken stuck on the local token when switching to client-only mode.
+  property string bridgeTokenFromFile: ""
+  readonly property string bridgeToken: clientOnlyMode ? (cfg.bridgeTokenManual ?? "") : bridgeTokenFromFile
   property bool bridgeOnlinePending: false
 
   property var state: ({
@@ -77,10 +94,27 @@ Item {
     return "http://" + bridgeHost + ":" + bridgePort + path;
   }
 
+  property bool autoStartGatewayPending: false
+
+  function maybeStartGateway() {
+    if (root.clientOnlyMode) return;
+    if (!root.autoStartGateway) return;
+    var gw = root.state?.summary?.gateway?.status || root.state?.hermes?.gateway_status || "";
+    if (gw === "offline" || gw === "stopped" || gw === "unknown" || gw === "") {
+      root.startGateway();
+    }
+  }
+
   function refreshState() {
+    Logger.i("hermes-agent", "refreshState fetching:", bridgeUrl("/state"), "tokenPresent:", !!root.bridgeToken, "tokenLen:", root.bridgeToken.length);
     getJson("/state", function(data) {
       if (data) {
+        Logger.i("hermes-agent", "refreshState got data, hermes.status:", data.hermes?.status, "gateway:", data.summary?.gateway?.status);
         root.state = data;
+        if (root.autoStartGatewayPending) {
+          root.autoStartGatewayPending = false;
+          root.maybeStartGateway();
+        }
       }
     });
   }
@@ -101,6 +135,7 @@ Item {
   }
 
   function onBridgeOnline() {
+    Logger.i("hermes-agent", "onBridgeOnline clientOnlyMode:", root.clientOnlyMode);
     if (root.clientOnlyMode) {
       // Token is already set from settings; go straight to state + detection.
       root.bridgeOnlinePending = false;
@@ -109,18 +144,23 @@ Item {
       return;
     }
     root.bridgeOnlinePending = true;
+    root.autoStartGatewayPending = true;
     tokenFileView.reload();
   }
 
   function ensureBridge() {
+    Logger.i("hermes-agent", "ensureBridge ping:", bridgeUrl("/health"));
     getJson("/health", function(data) {
       if (data && data.bridge && data.bridge.status === "online") {
+        Logger.i("hermes-agent", "ensureBridge health OK");
         root.onBridgeOnline();
       } else if (root.clientOnlyMode) {
+        Logger.i("hermes-agent", "ensureBridge remote unreachable");
         // Remote bridge not reachable. statePollTimer will keep retrying /state
         // and surface connection errors via setBridgeError.
         root.setBridgeError("Remote bridge unreachable at " + bridgeHost + ":" + bridgePort);
       } else if (root.autoStartBridge) {
+        Logger.i("hermes-agent", "ensureBridge starting local bridge");
         root.startBridge();
         bridgeRetryTimer.start();
       }
@@ -262,12 +302,14 @@ Item {
       if (xhr.readyState !== XMLHttpRequest.DONE) return;
       if (xhr.status >= 200 && xhr.status < 300) {
         try {
+          Logger.i("hermes-agent", "getJson", path, "OK, token set:", !!root.bridgeToken);
           callback(JSON.parse(xhr.responseText));
         } catch (e) {
           setBridgeError("Invalid bridge response");
           callback(null);
         }
       } else {
+        Logger.i("hermes-agent", "getJson", path, "failed status:", xhr.status, "token set:", !!root.bridgeToken, "response:", xhr.responseText?.substring(0,100));
         var msg;
         if (xhr.status === 0) {
           msg = "Connection failed: " + bridgeHost + ":" + bridgePort + " unreachable";
@@ -293,12 +335,14 @@ Item {
       if (xhr.readyState !== XMLHttpRequest.DONE) return;
       if (xhr.status >= 200 && xhr.status < 300) {
         try {
+          Logger.i("hermes-agent", "getJson", path, "OK, token set:", !!root.bridgeToken);
           callback(JSON.parse(xhr.responseText));
         } catch (e) {
           setBridgeError("Invalid bridge response");
           callback(null);
         }
       } else {
+        Logger.i("hermes-agent", "getJson", path, "failed status:", xhr.status, "token set:", !!root.bridgeToken, "response:", xhr.responseText?.substring(0,100));
         var msg;
         if (xhr.status === 0) {
           msg = "Connection failed: " + bridgeHost + ":" + bridgePort + " unreachable";
@@ -328,6 +372,7 @@ Item {
   }
 
   function loadStateFromFile() {
+    if (root.clientOnlyMode) return; // remote bridge: never overwrite HTTP state with local file
     try {
       var text = stateFileView.text();
       if (!text || text.trim() === "") return;
@@ -367,7 +412,7 @@ Item {
     printErrors: false
     onLoaded: {
       var text = tokenFileView.text();
-      root.bridgeToken = text ? text.trim() : "";
+      root.bridgeTokenFromFile = text ? text.trim() : "";
       if (root.bridgeOnlinePending) {
         root.bridgeOnlinePending = false;
         root.refreshState();

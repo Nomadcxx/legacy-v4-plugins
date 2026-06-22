@@ -139,7 +139,11 @@ ColumnLayout {
         label: pluginApi?.tr("settings.bridgeToken")
         description: pluginApi?.tr("settings.bridgeTokenDescription")
         text: root.valueBridgeTokenManual
-        onTextChanged: root.valueBridgeTokenManual = text
+        onTextChanged: {
+          // Guard: only update when visible. Some QML components clear text
+          // when hidden, which would wipe the saved token on toggle OFF.
+          if (root.valueClientOnlyMode) root.valueBridgeTokenManual = text;
+        }
       }
 
       RowLayout {
@@ -153,7 +157,7 @@ ColumnLayout {
         }
 
         NLabel {
-          text: root.testResult
+          label: root.testResult
           labelColor: root.testResultColor
         }
       }
@@ -277,6 +281,7 @@ ColumnLayout {
 
   function saveSettings() {
     if (!pluginApi) return;
+    Logger.i("hermes-agent", "saveSettings: tokenManual len:", root.valueBridgeTokenManual.length, "clientOnlyMode:", root.valueClientOnlyMode);
     pluginApi.pluginSettings.bridgeHost = root.valueBridgeHost;
     pluginApi.pluginSettings.bridgePort = root.valueBridgePort;
     pluginApi.pluginSettings.stateFile = root.valueStateFile;
