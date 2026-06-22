@@ -123,35 +123,13 @@ Item {
           Layout.preferredHeight: Style.baseWidgetSize
           Layout.alignment: Qt.AlignVCenter
 
-          Image {
-            id: headerHermesImage
+          Components.HermesAvatar {
             anchors.fill: parent
-            source: root.hermesIconPath
-            sourceSize.width: width
-            sourceSize.height: height
-            fillMode: Image.PreserveAspectFit
-            smooth: true
-            mipmap: true
-            visible: status === Image.Ready
-          }
-
-          NIcon {
-            anchors.centerIn: parent
-            visible: headerHermesImage.status !== Image.Ready
-            icon: "sparkles"
-            pointSize: Style.fontSizeXL
-            color: root.statusColor()
-          }
-
-          Rectangle {
-            width: 9 * Style.uiScaleRatio
-            height: width
-            radius: width / 2
-            anchors.right: parent.right
-            anchors.bottom: parent.bottom
-            color: root.statusColor()
-            border.width: Style.borderS
-            border.color: Color.mSurface
+            iconPath: root.hermesIconPath
+            fallbackIcon: "sparkles"
+            statusColor: root.statusColor()
+            iconSize: Style.fontSizeXL
+            dotSize: 9 * Style.uiScaleRatio
           }
         }
 

@@ -297,52 +297,27 @@ Item {
   }
 
   function getJson(path, callback) {
-    var xhr = new XMLHttpRequest();
-    xhr.onreadystatechange = function() {
-      if (xhr.readyState !== XMLHttpRequest.DONE) return;
-      if (xhr.status >= 200 && xhr.status < 300) {
-        try {
-          Logger.i("hermes-agent", "getJson", path, "OK, token set:", !!root.bridgeToken);
-          callback(JSON.parse(xhr.responseText));
-        } catch (e) {
-          setBridgeError("Invalid bridge response");
-          callback(null);
-        }
-      } else {
-        Logger.i("hermes-agent", "getJson", path, "failed status:", xhr.status, "token set:", !!root.bridgeToken, "response:", xhr.responseText?.substring(0,100));
-        var msg;
-        if (xhr.status === 0) {
-          msg = "Connection failed: " + bridgeHost + ":" + bridgePort + " unreachable";
-        } else if (xhr.status === 403) {
-          msg = "Authentication failed: wrong bridge token";
-        } else {
-          msg = "Bridge request failed: " + xhr.status;
-        }
-        setBridgeError(msg);
-        callback(null);
-      }
-    };
-    xhr.open("GET", bridgeUrl(path));
-    if (root.bridgeToken) {
-      xhr.setRequestHeader("X-Bridge-Token", root.bridgeToken);
-    }
-    xhr.send();
+    requestJson("GET", path, null, callback);
   }
 
   function postJson(path, payload, callback) {
+    requestJson("POST", path, payload, callback);
+  }
+
+  function requestJson(method, path, payload, callback) {
     var xhr = new XMLHttpRequest();
     xhr.onreadystatechange = function() {
       if (xhr.readyState !== XMLHttpRequest.DONE) return;
       if (xhr.status >= 200 && xhr.status < 300) {
         try {
-          Logger.i("hermes-agent", "getJson", path, "OK, token set:", !!root.bridgeToken);
+          Logger.i("hermes-agent", method.toLowerCase() + "Json", path, "OK, token set:", !!root.bridgeToken);
           callback(JSON.parse(xhr.responseText));
         } catch (e) {
           setBridgeError("Invalid bridge response");
           callback(null);
         }
       } else {
-        Logger.i("hermes-agent", "getJson", path, "failed status:", xhr.status, "token set:", !!root.bridgeToken, "response:", xhr.responseText?.substring(0,100));
+        Logger.i("hermes-agent", method.toLowerCase() + "Json", path, "failed status:", xhr.status, "token set:", !!root.bridgeToken, "response:", xhr.responseText?.substring(0,100));
         var msg;
         if (xhr.status === 0) {
           msg = "Connection failed: " + bridgeHost + ":" + bridgePort + " unreachable";
@@ -355,16 +330,20 @@ Item {
         callback(null);
       }
     };
-    xhr.open("POST", bridgeUrl(path));
+    xhr.open(method, bridgeUrl(path));
     if (root.bridgeToken) {
       xhr.setRequestHeader("X-Bridge-Token", root.bridgeToken);
     }
-    xhr.setRequestHeader("Content-Type", "application/json");
-    xhr.send(JSON.stringify(payload || {}));
+    if (method === "POST") {
+      xhr.setRequestHeader("Content-Type", "application/json");
+      xhr.send(JSON.stringify(payload || {}));
+    } else {
+      xhr.send();
+    }
   }
 
   function setBridgeError(message) {
-    var next = root.state;
+    var next = JSON.parse(JSON.stringify(root.state));
     next.bridge = next.bridge || {};
     next.bridge.status = "offline";
     next.bridge.error = message;

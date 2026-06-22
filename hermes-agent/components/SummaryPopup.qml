@@ -157,35 +157,13 @@ PopupWindow {
           Layout.preferredHeight: Style.fontSizeXXL
           Layout.alignment: Qt.AlignVCenter
 
-          Image {
-            id: headerHermesImage
+          HermesAvatar {
             anchors.fill: parent
-            source: root.hermesIconPath
-            sourceSize.width: width
-            sourceSize.height: height
-            fillMode: Image.PreserveAspectFit
-            smooth: true
-            mipmap: true
-            visible: status === Image.Ready
-          }
-
-          NIcon {
-            anchors.centerIn: parent
-            visible: headerHermesImage.status !== Image.Ready
-            icon: root.hermesStatus === "busy" ? "loader" : "sparkles"
-            pointSize: Style.fontSizeXL
-            color: root.statusColor(root.hermesStatus)
-          }
-
-          Rectangle {
-            width: 8 * Style.uiScaleRatio
-            height: width
-            radius: width / 2
-            anchors.right: parent.right
-            anchors.bottom: parent.bottom
-            color: root.statusColor(root.hermesStatus)
-            border.width: Style.borderS
-            border.color: Color.mSurface
+            iconPath: root.hermesIconPath
+            fallbackIcon: root.hermesStatus === "busy" ? "loader" : "sparkles"
+            statusColor: root.statusColor(root.hermesStatus)
+            iconSize: Style.fontSizeXL
+            dotSize: 8 * Style.uiScaleRatio
           }
         }
 
@@ -234,10 +212,10 @@ PopupWindow {
         rowSpacing: Style.marginS
 
           NText {
-            text: (pluginApi?.tr("summary.model"))
-            pointSize: Style.fontSizeS
-            color: Color.mOnSurfaceVariant
-          }
+          text: (pluginApi?.tr("summary.model"))
+          pointSize: Style.fontSizeS
+          color: Color.mOnSurfaceVariant
+        }
 
         NText {
           text: root.modelLabel

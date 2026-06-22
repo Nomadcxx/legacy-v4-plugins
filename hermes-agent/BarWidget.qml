@@ -86,7 +86,6 @@ Item {
     if (status === "idle") return "";
     if (status === "unknown") return "";
     if (status === "attention") return "!";
-    if (session.running) return statusText;
     return statusText;
   }
 
@@ -144,36 +143,13 @@ Item {
           Layout.preferredHeight: root.barFontSize + 6
           Layout.alignment: Qt.AlignVCenter
 
-          Image {
-            id: rowHermesImage
+          Components.HermesAvatar {
             anchors.fill: parent
-            source: root.hermesIconPath
-            sourceSize.width: width
-            sourceSize.height: height
-            fillMode: Image.PreserveAspectFit
-            smooth: true
-            mipmap: true
-            visible: status === Image.Ready
-          }
-
-          NIcon {
-            anchors.centerIn: parent
-            visible: rowHermesImage.status !== Image.Ready
-            icon: root.statusIcon
-            pointSize: root.barFontSize
-            applyUiScale: false
-            color: root.statusColor
-          }
-
-          Rectangle {
-            width: 7 * Style.uiScaleRatio
-            height: width
-            radius: width / 2
-            anchors.right: parent.right
-            anchors.bottom: parent.bottom
-            color: root.statusColor
-            border.width: Style.borderS
-            border.color: Color.mSurface
+            iconPath: root.hermesIconPath
+            fallbackIcon: root.statusIcon
+            statusColor: root.statusColor
+            iconSize: root.barFontSize
+            dotSize: 7 * Style.uiScaleRatio
           }
         }
 
@@ -198,36 +174,13 @@ Item {
           Layout.preferredHeight: root.barFontSize + 8
           Layout.alignment: Qt.AlignHCenter
 
-          Image {
-            id: colHermesImage
+          Components.HermesAvatar {
             anchors.fill: parent
-            source: root.hermesIconPath
-            sourceSize.width: width
-            sourceSize.height: height
-            fillMode: Image.PreserveAspectFit
-            smooth: true
-            mipmap: true
-            visible: status === Image.Ready
-          }
-
-          NIcon {
-            anchors.centerIn: parent
-            visible: colHermesImage.status !== Image.Ready
-            icon: root.statusIcon
-            pointSize: root.barFontSize
-            applyUiScale: false
-            color: root.statusColor
-          }
-
-          Rectangle {
-            width: 7 * Style.uiScaleRatio
-            height: width
-            radius: width / 2
-            anchors.right: parent.right
-            anchors.bottom: parent.bottom
-            color: root.statusColor
-            border.width: Style.borderS
-            border.color: Color.mSurface
+            iconPath: root.hermesIconPath
+            fallbackIcon: root.statusIcon
+            statusColor: root.statusColor
+            iconSize: root.barFontSize
+            dotSize: 7 * Style.uiScaleRatio
           }
         }
       }
