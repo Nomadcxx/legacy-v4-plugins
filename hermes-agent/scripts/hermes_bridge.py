@@ -799,6 +799,14 @@ class BridgeRequestHandler(BaseHTTPRequestHandler):
         if self.path == "/state":
             self._send_json(200, self.server.state.snapshot())
             return
+        if self.path == "/sessions":
+            try:
+                response = self.server.rpc.dispatch("session.list", {"limit": 10})
+                result = response.get("result", response)
+                self._send_json(200, result if isinstance(result, dict) else {"sessions": []})
+            except Exception:
+                self._send_json(200, {"sessions": []})
+            return
         self._send_json(404, {"error": "not_found"})
 
     def do_POST(self) -> None:
@@ -857,12 +865,45 @@ class BridgeRequestHandler(BaseHTTPRequestHandler):
         if not session_id:
             self._send_json(400, {"error": "missing_session_id"})
             return
-        response = self.server.rpc.dispatch("session.resume", {"session_id": session_id})
-        result = response.get("result", response)
-        if isinstance(result, dict):
-            self.server.state.set_session_from_resume(result)
-            self.server.state.write()
-        self._send_json(200, {"result": result, "state": self.server.state.snapshot()})
+        # Load messages directly from the SessionDB for instant UI feedback.
+        db_path = self.server.state.hermes_home / "state.db"
+        loaded = False
+        if db_path.exists():
+            try:
+                import sqlite3
+                conn = sqlite3.connect(str(db_path))
+                conn.row_factory = sqlite3.Row
+                rows = conn.execute(
+                    "SELECT role, content FROM messages WHERE session_id = ? ORDER BY timestamp",
+                    (session_id,),
+                ).fetchall()
+                if rows:
+                    normalized = [
+                        {
+                            "id": f"msg-{uuid.uuid4().hex}",
+                            "role": str(dict(r).get("role") or ""),
+                            "text": str(dict(r).get("content") or ""),
+                            "streaming": False,
+                            "ts": 0,
+                        }
+                        for r in rows
+                    ]
+                    self.server.state._state["messages"] = normalized
+                    self.server.state._state["session"]["id"] = ""
+                    self.server.state._state["session"]["stored_id"] = session_id
+                    self.server.state._state["session"]["running"] = False
+                    self.server.state._state["hermes"]["status"] = "idle"
+                    self.server.state._state["approval"] = (
+                        {"pending": False, "message": "", "tool_name": "", "request": {}}
+                    )
+                    loaded = True
+            except Exception:
+                pass
+        # Also dispatch session.resume to the gateway so it creates a proper
+        # session object. The gateway needs this for prompt.submit to work.
+        self.server.rpc.dispatch("session.resume", {"session_id": session_id})
+        self.server.state.write()
+        self._send_json(200, {"state": self.server.state.snapshot()})
 
     def _handle_prompt(self, payload: dict[str, Any]) -> None:
         text = str(payload.get("text") or "").strip()
@@ -871,12 +912,18 @@ class BridgeRequestHandler(BaseHTTPRequestHandler):
             return
 
         session_id = self.server.state.snapshot()["session"]["id"]
+        existing_messages = list(self.server.state._state["messages"])
         if not session_id:
             create_response = self.server.rpc.dispatch("session.create", {})
             create_result = create_response.get("result", create_response)
             if isinstance(create_result, dict):
                 self.server.state.set_session_from_create(create_result)
                 session_id = self.server.state.snapshot()["session"]["id"]
+                # Restore messages from a resumed session that were loaded from DB.
+                # set_session_from_create clears messages so only the new prompt
+                # would appear; we want the full history.
+                if existing_messages:
+                    self.server.state._state["messages"] = existing_messages
 
         params = {"session_id": session_id, "text": text}
         self.server.state.append_user_message(text)
